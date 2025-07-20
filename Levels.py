@@ -1,10 +1,10 @@
 from DataValues import Constants, Assets
-from DataValues.TypeAliases import color_t, str_dict_t
+from DataValues.TypeAliases import Tcolor, dictStrAny
 from Platform import Platform
 from Interactions import Interaction
 
 class Level:
-    def __init__(self, name: str, tags: list[str], platforms: list[Platform], interactions: dict[str, list[Interaction]], background: color_t = Assets.BLACK):
+    def __init__(self, name: str, tags: list[str], platforms: list[Platform], interactions: dict[str, list[Interaction]], background: Tcolor = Assets.BLACK):
         self.name = name
         self.tags = tags
         self.platforms = platforms
@@ -13,9 +13,9 @@ class Level:
         self.side_collision_interactions = interactions.get("side_collision", [])
         self.frame_interactions = interactions.get("frame", [])
         self.background = background
-        self.data: str_dict_t = {}
+        self.data: dictStrAny = {}
 
-    def to_dict(self) -> str_dict_t:
+    def to_dict(self) -> dictStrAny:
         return {
             "name": self.name,
             "tags": self.tags,
@@ -30,7 +30,7 @@ class Level:
         }
 
     @classmethod
-    def from_dict(cls, data: str_dict_t) -> "Level":
+    def from_dict(cls, data: dictStrAny) -> "Level":
         return cls(data["name"], data["tags"], data["platforms"],
         {
             inter_type: [Interaction.from_dict(inter) for inter in inters] for inter_type, inters in data.get("interactions", {})

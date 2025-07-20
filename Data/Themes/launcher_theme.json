@@ -1,0 +1,43 @@
+{
+  "@main_menu": {
+    "colours": {
+      "regular_text": "#D0D0D0,#FFFFFF,#D050FF,90"
+    }
+  },
+  "#title": {
+    "misc": {
+        "shape": "rectangle",
+        "shape_corner_radius": "4",
+        "border_width": "0",
+        "shadow_width": "0"
+    },
+    "font": {
+      "name": "montserrat",
+      "size": "64",
+      "bold": "1",
+      "italic": "0",
+      "regular_path": "Data/Fonts/Montserrat-Regular.ttf",
+      "bold_path": "Data/Fonts/Montserrat-Bold.ttf",
+      "italic_path": "Data/Fonts/Montserrat-Italic.ttf",
+      "bold_italic_path": "Data/Fonts/Montserrat-BoldItalic.ttf"
+    }
+  },
+  "button": {
+    "misc": {
+        "shape": "rounded_rectangle",
+        "shape_corner_radius": "4",
+        "border_width": "1",
+        "shadow_width": "2"
+    },
+    "font": {
+      "name": "montserrat",
+      "size": "36",
+      "bold": "1",
+      "italic": "0",
+      "regular_path": "Data/Fonts/Montserrat-Regular.ttf",
+      "bold_path": "Data/Fonts/Montserrat-Bold.ttf",
+      "italic_path": "Data/Fonts/Montserrat-Italic.ttf",
+      "bold_italic_path": "Data/Fonts/Montserrat-BoldItalic.ttf"
+    }
+  }
+}

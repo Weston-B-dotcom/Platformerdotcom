@@ -1,6 +1,6 @@
 from unittest import case
-
-from DataValues.TypeAliases import str_dict_t
+from GameInstance import Instance
+from DataValues.TypeAliases import dictStrAny
 from Player import Player
 from Levels import Level
 from enum import Enum, auto
@@ -93,12 +93,12 @@ a = pygame.Rect(0, 0, 12, 10)
 a.colliderect(pygame.Rect(0, 0, 43, 53))
 
 class Interaction:
-    def __init__(self, interaction_type: InteractionType, args: list["Interaction"], data: str_dict_t):
+    def __init__(self, interaction_type: InteractionType, args: list["Interaction"], data: dictStrAny):
         self.interaction_type = interaction_type
         self.args = args
         self.data = data
 
-    def to_dict(self) -> str_dict_t:
+    def to_dict(self) -> dictStrAny:
         return {
             "interaction_type": self.interaction_type.name,
             "args": [arg.to_dict() for arg in self.args],
@@ -106,14 +106,15 @@ class Interaction:
         }
 
     @classmethod
-    def from_dict(cls, data: str_dict_t) -> "Interaction":
+    def from_dict(cls, data: dictStrAny) -> "Interaction":
         return cls(InteractionType(data["interaction_type"]), [Interaction.from_dict(arg) for arg in data.get("args", [])], data.get("data", {}))
 
-def parseOperation(interaction: Interaction, player: Player, level: Level) -> bool:
+def parseOperation(interaction: Interaction, instance: Instance, player: Player, level: Level):
     """Description
 
     Args:
         interaction (Interaction): description
+        instance (Instance): description
         player (Player): description
         level (Level): description
     """
@@ -121,57 +122,58 @@ def parseOperation(interaction: Interaction, player: Player, level: Level) -> bo
         case OperatorType.UNARY:
             match UnaryType(interaction.data["operator"]):
                 case UnaryType.NOT:
-                    return not parseInteraction(interaction.args[0], player, level)
+                    return not parseInteraction(interaction.args[0], instance, player, level)
                 case UnaryType.ABS:
-                    return abs(parseInteraction(interaction.args[0], player, level))
+                    return abs(parseInteraction(interaction.args[0], instance, player, level))
                 case UnaryType.FLOOR:
-                    return math.floor(parseInteraction(interaction.args[0], player, level))
+                    return math.floor(parseInteraction(interaction.args[0], instance, player, level))
                 case UnaryType.CEIL:
-                    return math.ceil(parseInteraction(interaction.args[0], player, level))
+                    return math.ceil(parseInteraction(interaction.args[0], instance, player, level))
                 case UnaryType.ROUND:
-                    return round(parseInteraction(interaction.args[0], player, level))
+                    return round(parseInteraction(interaction.args[0], instance, player, level))
         case OperatorType.BINARY:
             match BinaryType(interaction.data["operator"]):
                 case BinaryType.EQUAL:
-                    return parseInteraction(interaction.args[0], player, level) == parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) == parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.NOT_EQUAL:
-                    return parseInteraction(interaction.args[0], player, level) != parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) != parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.GREATER:
-                    return parseInteraction(interaction.args[0], player, level) > parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) > parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.LESSER:
-                    return parseInteraction(interaction.args[0], player, level) < parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) < parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.EQUAL_GREATER:
-                    return parseInteraction(interaction.args[0], player, level) >= parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) >= parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.EQUAL_LESSER:
-                    return parseInteraction(interaction.args[0], player, level) <= parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) <= parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.AND:
-                    return parseInteraction(interaction.args[0], player, level) and parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) and parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.OR:
-                    return parseInteraction(interaction.args[0], player, level) or parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) or parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.ADD:
-                    return parseInteraction(interaction.args[0], player, level) + parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) + parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.SUBTRACT:
-                    return parseInteraction(interaction.args[0], player, level) - parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) - parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.MULTIPLY:
-                    return parseInteraction(interaction.args[0], player, level) * parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) * parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.DIVIDE:
-                    return parseInteraction(interaction.args[0], player, level) / parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) / parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.POW:
-                    return math.pow(parseInteraction(interaction.args[0], player, level), parseInteraction(interaction.args[1], player, level))
+                    return math.pow(parseInteraction(interaction.args[0], instance, player, level), parseInteraction(interaction.args[1], instance, player, level))
                 case BinaryType.MOD:
-                    return parseInteraction(interaction.args[0], player, level) % parseInteraction(interaction.args[1], player, level)
+                    return parseInteraction(interaction.args[0], instance, player, level) % parseInteraction(interaction.args[1], instance, player, level)
                 case BinaryType.MIN:
-                    return min(parseInteraction(interaction.args[0], player, level), parseInteraction(interaction.args[1], player, level))
+                    return min(parseInteraction(interaction.args[0], instance, player, level), parseInteraction(interaction.args[1], instance, player, level))
                 case BinaryType.MAX:
-                    return max(parseInteraction(interaction.args[0], player, level), parseInteraction(interaction.args[1], player, level))
+                    return max(parseInteraction(interaction.args[0], instance, player, level), parseInteraction(interaction.args[1], instance, player, level))
             ...
     return None
 
-def parseLiteral(interaction: Interaction, player: Player, level: Level):
+def parseLiteral(interaction: Interaction, instance: Instance, player: Player, level: Level):
     """Description
 
     Args:
         interaction (Interaction): description
+        instance (Instance): description
         player (Player): description
         level (Level): description
     """
@@ -192,42 +194,53 @@ def parseLiteral(interaction: Interaction, player: Player, level: Level):
             return Color(interaction.data["value"])
     return None
 
-def parseConditional(interaction: Interaction, player: Player, level: Level) -> None:
+def parseConditional(interaction: Interaction, instance: Instance, player: Player, level: Level) -> None:
     """Description
 
     Args:
         interaction (Interaction): description
+        instance (Instance): description
         player (Player): description
         level (Level): description
     """
-    if parseInteraction(interaction.args[0], player, level):
-        return parseInteraction(interaction.args[1], player, level)
+    if parseInteraction(interaction.args[0], instance, player, level):
+        return parseInteraction(interaction.args[1], instance, player, level)
     else:
-        return parseInteraction(interaction.args[2], player, level)
+        return parseInteraction(interaction.args[2], instance, player, level)
 
-def parseBlock(interaction: Interaction, player: Player, level: Level):
+def parseBlock(interaction: Interaction, instance: Instance, player: Player, level: Level):
     for inter in interaction.args:
-        evaluated = parseInteraction(inter, player, level)
+        evaluated = parseInteraction(inter, instance, player, level)
         if isinstance(evaluated, ReturnWrapper):
             return evaluated.data
     return None
 
-def parseInteraction(interaction: Interaction, player: Player, level: Level):
+def parseInteraction(interaction: Interaction, instance: Instance, player: Player, level: Level):
     """Description
 
     Args:
         interaction (Interaction): description
+        instance (Instance): description
         player (Player): description
         level (Level): description
     """
     match interaction.interaction_type:
         case InteractionType.set_value:
-            level.data[interaction.data["key"]] = parseInteraction(interaction.args[0], player, level)
+            match interaction.data["mode"]:
+                case "local":
+                    level.data[interaction.data["key"]] = parseInteraction(interaction.args[0], instance, player, level)
+                case "global":
+                    instance.data[interaction.data["key"]] = parseInteraction(interaction.args[0], instance, player, level)
             return None
         case InteractionType.get_value:
-            return level.data[interaction.data["key"]]
+            match interaction.data["mode"]:
+                case "local":
+                    return level.data[interaction.data["key"]]
+                case "global":
+                    return instance.data[interaction.data["key"]]
+            return None
         case InteractionType.set_stage:
-            # TODO: Implement this once the global is in.
+            instance.current_level = parseInteraction(interaction.args[0], instance, player, level)
             return None
         case InteractionType.get_stage:
             return level.name
@@ -236,21 +249,21 @@ def parseInteraction(interaction: Interaction, player: Player, level: Level):
         case InteractionType.get_platform:
             return level.platforms[interaction.data["platform_id"]]
         case InteractionType.set_field:
-            setattr(parseInteraction(interaction.args[0], player, level), interaction.data["field"], parseInteraction(interaction.args[1], player, level))
+            setattr(parseInteraction(interaction.args[0], instance, player, level), interaction.data["field"], parseInteraction(interaction.args[1], instance, player, level))
             return None
         case InteractionType.get_field:
-            return getattr(parseInteraction(interaction.args[0], player, level), interaction.data["field"])
+            return getattr(parseInteraction(interaction.args[0], instance, player, level), interaction.data["field"])
         case InteractionType.operation:
-            return parseOperation(interaction, player, level)
+            return parseOperation(interaction, instance, player, level)
         case InteractionType.literal_value:
-            return parseLiteral(interaction, player, level)
+            return parseLiteral(interaction, instance, player, level)
         case InteractionType.call_method:
-            eval(f'''return getattr(parseInteraction(interaction.args[0], player, level), interaction.data["method"])({", ".join([str(parseInteraction(interaction.args[i], player, level)) for i in range(1, len(interaction.args))])})''')
+            eval(f'''return getattr(parseInteraction(interaction.args[0], instance, player, level), interaction.data["method"])({", ".join([str(parseInteraction(interaction.args[i], instance, player, level)) for i in range(1, len(interaction.args))])})''')
         case InteractionType.conditional:
-            return parseConditional(interaction, player, level)
+            return parseConditional(interaction, instance, player, level)
         case InteractionType.block:
-            return parseBlock(interaction, player, level)
+            return parseBlock(interaction, instance, player, level)
         case InteractionType.return_statement:
-            return ReturnWrapper(parseInteraction(interaction.args))
+            return ReturnWrapper(parseInteraction(interaction.args[0], instance, player, level))
         case InteractionType.none:
             return None

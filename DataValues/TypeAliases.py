@@ -1,6 +1,16 @@
 from typing import TypeAlias, Any
 
-vec2_t: TypeAlias = tuple[int, int]
-color_t: TypeAlias = tuple[int, int, int]
-platform_point_t: TypeAlias = tuple[int, int, int, int, float]
-str_dict_t: TypeAlias = dict[str, Any]
+#region Dictionaries
+dictStrAny: TypeAlias = dict[str, Any]
+dictStrStr: TypeAlias = dict[str, str]
+#endregion
+
+#region Wrappers
+Tvec2: TypeAlias = tuple[int, int]
+Tcolor: TypeAlias = tuple[int, int, int]
+#endregion
+
+#region Info Tuples
+platformPoint: TypeAlias = tuple[int, int, int, int, float]
+modInfo: TypeAlias = tuple[str, str, str, dictStrStr]
+#endregion
