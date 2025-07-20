@@ -35,8 +35,6 @@ def main():
     debug = UIButton(Rect(60, 382, Constants.SCREEN_WIDTH - 124, 75), "Debug Panel", uiManager, panel, "Early bird gets the worm...", object_id=ObjectID("#debug", "@main_menu"), command=lambda: m_RunDebug)
     porter = UIButton(Rect(60, 477, Constants.SCREEN_WIDTH - 124, 75), "Porter", uiManager, panel, "Teleporter!!! (jk it for updates :3)", object_id=ObjectID("#porter", "@main_menu"), command=lambda: m_RunPorter)
 
-    #TODO: Make Achievement button, Editor button, Debug button, and Porter button
-
     running: bool = True
     while running:
         for event in pygame.event.get():
