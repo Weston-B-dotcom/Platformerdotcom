@@ -1,0 +1,64 @@
+{
+  "a": [
+    {
+      "pos": [0, 580],
+      "width": 650,
+      "height": 20,
+      "color": [0, 255, 0],
+      "points": null,
+      "behavior": 0
+    },
+    {
+      "interaction_type": "conditional",
+      "args": [
+        {
+          "interaction_type": "compare",
+          "data": {
+            "comparison": "equal"
+          },
+          "args": [
+            {
+              "interaction_type": "get_field",
+              "args": [
+                {
+                  "interaction_type": "literal_value",
+                  "data": {
+                    "value": "x",
+                    "type": ""
+                  }
+                },
+                {
+                  "interaction_type": "get_player"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "interaction_type": "none"
+        },
+        {
+          "interaction_type": "none"
+        }
+      ]
+    },
+    {
+      "name": "Level One",
+      "platforms": [],
+      "interactions": {
+        "top_collision": [
+
+        ],
+        "bottom_collision": [
+
+        ],
+        "side_collision": [
+
+        ],
+        "frame": [
+
+        ]
+      }
+    }
+  ]
+}
