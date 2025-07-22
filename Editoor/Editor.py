@@ -50,6 +50,91 @@ class Editor:
         self.grid_slider: UIHorizontalSlider = None
         self.grid_slider_label: UILabel = None
         self.cursor_mode: MouseMode = MouseMode.CURSOR
+        self.changes: list[ChangeInfo] = []
+        self.change_index: int = -1
+
+        self.level_name: UITextEntryLine = None
+        self.tag_add_name: UITextEntryLine = None
+        self.tags_scroll: UIScrollingContainer = None
+        self.tags_list: list[UIButton] = []
+        self.growth_button: UIButton = None
+        self.growth_direction: UIDropDownMenu = None
+        self.growth_amount: UITextEntryLine = None
+        self.background: UIColorEntry = None
+
+        # Hop on down to init, we're making a window.
+
+
+        # In theory we could add branching in the future.
+        # what that
+        # Like how git does it.
+        # Aka when you make a new change instead of nuking everything in front of where you are.
+        # You add a horizontal 'branch', so if you go back to the other branch.
+        # That undo tree is kept.
+        #   2
+        # 1 2 <-                                            this 1 here
+        # 1 2 <- point where change is made, instead of deleting ^, you split to a new branch.
+        # 1
+        # 1
+        # 1 = branch 1
+        # 2 = branch 2
+        # definetly
+        # Not hard to do, but we should probably get save screen in. Simple enough.
+
+        # a = UIWindow(Rect(0, 0, 1, 1), self.app.manager)
+        # a.kill()
+
+    def undo(self):
+        if self.change_index < 0:
+            return
+        #print("Undoing: ")
+        #print(self.change_index)
+        #print(self.changes)
+        change: ChangeInfo = self.changes[self.change_index]
+        match change.change_type:
+            case ChangeType.CREATE:
+                self.level.platforms.pop()
+            case ChangeType.DELETE:
+                self.level.platforms.insert(change.data["platform"], Platform.from_dict(change.data["data"]))
+            case ChangeType.MOVE:
+                self.level.platforms[change.data["platform"]].rect.update(change.data["old_pos"], self.level.platforms[change.data["platform"]].rect.size)
+            case ChangeType.RESIZE:
+                self.level.platforms[change.data["platform"]].Resize(Vector2(change.data["old_pos"]))
+        self.change_index -= 1
+
+    def redo(self):
+        #print("Redoing (Pre index): ")
+        #print(self.change_index)
+        #print(self.changes)
+        if self.change_index >= len(self.changes) - 1:
+            return
+        self.change_index += 1
+        #print("Redoing (Post index): ")
+        #print(self.change_index)
+        #print(self.changes)
+        change: ChangeInfo = self.changes[self.change_index]
+        match change.change_type:
+            case ChangeType.CREATE:
+                self.level.platforms.append(Platform.from_dict(change.data["data"]))
+            case ChangeType.DELETE:
+                self.level.platforms.pop(change.data["platform"])
+            case ChangeType.MOVE:
+                self.level.platforms[change.data["platform"]].rect.update(change.data["new_pos"], self.level.platforms[change.data["platform"]].rect.size)
+            case ChangeType.RESIZE:
+                self.level.platforms[change.data["platform"]].Resize(Vector2(change.data["new_pos"]))
+
+    def AddToStack(self, change: ChangeInfo):
+        #print("Pre stack: ")
+        #print(self.changes)
+        #print(self.change_index)
+
+        self.changes = self.changes[:(self.change_index + 1)]
+        self.changes.append(change)
+        self.change_index += 1
+
+        #print("Post stack: ")
+        #print(self.changes)
+        #print(self.change_index)
 
     def run(self):
         dragging: DragType = DragType.NONE
