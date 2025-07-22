@@ -71,6 +71,7 @@ class Editor:
                         if mouse[0] and mods & pygame.KMOD_LALT:
                             pygame.mouse.get_rel()
                             dragging = DragType.PANNING
+                            break
                         else:
                             match self.cursor_mode:
                                 case MouseMode.CURSOR:
@@ -219,11 +220,11 @@ class Editor:
 
             match dragging:
                 case DragType.SELECT:
-                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, mouse_grid_pos - (drag_pos + level_origin_screen_pos)), Assets.LIGHT_BLUE)
+                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, (mouse_grid_pos + level_origin_screen_pos) - (drag_pos + level_origin_screen_pos)), Assets.LIGHT_BLUE)
                 case DragType.DELETING:
-                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, mouse_grid_pos - (drag_pos + level_origin_screen_pos)), Assets.DARK_RED)
+                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, (mouse_grid_pos + level_origin_screen_pos) - (drag_pos + level_origin_screen_pos)), Assets.DARK_RED)
                 case DragType.CREATING:
-                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, mouse_grid_pos - (drag_pos + level_origin_screen_pos)), self.color)
+                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, (mouse_grid_pos + level_origin_screen_pos) - (drag_pos + level_origin_screen_pos)), self.color)
             #endregion
             self.app.manager.draw_ui(self.app.screen)
 
