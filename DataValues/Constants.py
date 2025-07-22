@@ -1,8 +1,8 @@
 # Game Constants
 from typing import final
 
-SCREEN_WIDTH: int = 800
-SCREEN_HEIGHT: int = 600
+SCREEN_WIDTH: int = 1280
+SCREEN_HEIGHT: int = 720
 SCREEN_SIZE: tuple[int, int] = (SCREEN_WIDTH, SCREEN_HEIGHT)
 FPS: int = 60
 DELTA_TIME: float = 1 / FPS
@@ -15,3 +15,7 @@ PLAYER_SIZE: tuple[int, int] = (PLAYER_WIDTH, PLAYER_HEIGHT)
 PLAYER_SPEED: int = 5
 JUMP_STRENGTH: int = -15
 GRAVITY: float = 0.8
+
+#Game properties
+VERSION = "0.1.0.0"
+"""Major, Minor, Patch, Build"""

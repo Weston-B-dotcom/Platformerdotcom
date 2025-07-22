@@ -48,6 +48,17 @@ while running:
     if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
         player.go_right()
 
+    """
+    x = 0
+    
+    if right:
+        x += 5
+    if left:
+        x -= 5
+    
+    player.x_speed = x * delta_time
+    """
+
     # Update game elements
     player.update(platforms) # Pass platforms to player for collision detection
 

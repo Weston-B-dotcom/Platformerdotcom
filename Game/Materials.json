@@ -1,0 +1,14 @@
+{
+  "Materials": [
+    {
+      "text": "Block",
+      "id": "block",
+      "color": [255, 255, 255]
+    },
+    {
+      "text": "Kill",
+      "id": "kill_block",
+      "color": [255, 0, 0]
+    }
+  ]
+}

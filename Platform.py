@@ -1,4 +1,5 @@
 from DataValues.TypeAliases import Tvec2, Tcolor, platformPoint, dictStrAny
+from pygame.sprite import Sprite
 import pygame, json, enum
 
 # --- Platform Class ---
@@ -7,7 +8,7 @@ class Behaviors(enum.Enum):
     reverse = 1
     snap = 2
 
-class Platform(pygame.sprite.Sprite):
+class Platform(Sprite):
     def __init__(self, pos: Tvec2, size: Tvec2, color: Tcolor, points: list[platformPoint] = None, behavior: Behaviors = Behaviors.none):
         super().__init__()
         self.color = color
