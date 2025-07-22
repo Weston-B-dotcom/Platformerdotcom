@@ -98,6 +98,26 @@
       }
     }
   },
+  "#trash_icon": {
+    "misc": {
+      "auto_scale_images": "1"
+    },
+    "images": {
+      "normal_image": {
+        "path": "Data/Images/trash_can.png"
+      }
+    }
+  },
+  "#insert_icon": {
+    "misc": {
+      "auto_scale_images": "1"
+    },
+    "images": {
+      "normal_image": {
+        "path": "Data/Images/insert.png"
+      }
+    }
+  },
   "button": {
     "misc": {
         "shape": "rounded_rectangle",
