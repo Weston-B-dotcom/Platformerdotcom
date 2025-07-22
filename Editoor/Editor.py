@@ -37,6 +37,8 @@ class MouseMode(Enum):
 def SnapToGrid(vector: Vector2, scale: int):
     return ((vector + Vector2(scale * 0.5, scale * 0.5)) // scale) * scale
 
+quack = [Keybinds.GRID_DECREASE_ONE, Keybinds.GRID_INCREASE_ONE, Keybinds.GRID_DECREASE_TEN, Keybinds.GRID_INCREASE_TEN]
+
 class Editor:
     def __init__(self, app: Application|None = None, key = None):
         self.running: bool|None = None
@@ -144,18 +146,21 @@ class Editor:
                         dragging = DragType.NONE
                     case pygame.KEYDOWN:
                         if dragging == DragType.NONE or dragging == DragType.PANNING:
-                                if Keybinds.GRID_DECREASE_ONE.IsValid(mods, event.key):
-                                    self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 1, False)
-                                    self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
-                                elif Keybinds.GRID_INCREASE_ONE.IsValid(mods, event.key):
-                                    self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 1, False)
-                                    self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
-                                elif Keybinds.GRID_DECREASE_TEN.IsValid(mods, event.key):
-                                    self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 10, False)
-                                    self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
-                                elif Keybinds.GRID_INCREASE_TEN.IsValid(mods, event.key):
-                                    self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 10, False)
-                                    self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
+                            thingy = sorted([(val, val.IsValid(mods, event.key)) for val in quack if val.IsValid(mods, event.key) > -1], key=lambda x: x[1], reverse=True)
+                            if len(thingy) > 0:
+                                match thingy[0][0]:
+                                    case Keybinds.GRID_DECREASE_ONE:
+                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 1, False)
+                                        self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
+                                    case Keybinds.GRID_INCREASE_ONE:
+                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 1, False)
+                                        self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
+                                    case Keybinds.GRID_DECREASE_TEN:
+                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 10, False)
+                                        self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
+                                    case Keybinds.GRID_INCREASE_TEN:
+                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 10, False)
+                                        self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
                     case pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                         match event.ui_element:
                             case self.grid_slider:

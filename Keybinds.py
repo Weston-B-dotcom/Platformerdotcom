@@ -5,8 +5,8 @@ class Keybind:
         self.mods = mods
         self.key = key
 
-    def IsValid(self, mods: int, key: int) -> bool:
-        return key == self.key and mods == self.mods
+    def IsValid(self, mods: int, key: int) -> int:
+        return self.mods.bit_count() if (key == self.key and mods & self.mods == self.mods) else -1
 
     def Rebind(self, rebinds: tuple[int|None, int|None]) -> None:
         self.mods = self.mods if rebinds[0] is None else rebinds[0]
@@ -18,8 +18,8 @@ class Keybind:
 class Keybinds:
     GRID_DECREASE_ONE: Keybind = Keybind(pygame.KMOD_LCTRL, pygame.K_LEFT)
     GRID_INCREASE_ONE: Keybind = Keybind(pygame.KMOD_LCTRL, pygame.K_RIGHT)
-    GRID_DECREASE_TEN: Keybind = Keybind(pygame.KMOD_LCTRL & pygame.KMOD_LSHIFT, pygame.K_LEFT)
-    GRID_INCREASE_TEN: Keybind = Keybind(pygame.KMOD_LCTRL & pygame.KMOD_LSHIFT, pygame.K_RIGHT)
+    GRID_DECREASE_TEN: Keybind = Keybind(pygame.KMOD_LCTRL | pygame.KMOD_LSHIFT, pygame.K_LEFT)
+    GRID_INCREASE_TEN: Keybind = Keybind(pygame.KMOD_LCTRL | pygame.KMOD_LSHIFT, pygame.K_RIGHT)
 
     @staticmethod
     def to_json() -> dict[str, tuple[int, int]]:
