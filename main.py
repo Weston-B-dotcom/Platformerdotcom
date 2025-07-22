@@ -19,7 +19,8 @@ def main():
         {'name': 'montserrat', 'point_size': 72, 'style': 'regular', 'antialiased': '1'},
         {'name': 'montserrat', 'point_size': 64, 'style': 'regular', 'antialiased': '1'},
         {'name': 'montserrat', 'point_size': 36, 'style': 'regular', 'antialiased': '1'},
-        {'name': 'montserrat', 'point_size': 32, 'style': 'regular', 'antialiased': '1'}
+        {'name': 'montserrat', 'point_size': 32, 'style': 'regular', 'antialiased': '1'},
+        {'name': 'montserrat', 'point_size': 16, 'style': 'regular', 'antialiased': '1'}
     ])
 
     def m_RunGame():

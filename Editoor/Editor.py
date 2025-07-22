@@ -394,7 +394,7 @@ class Editor:
         self.running = True
         self.app.camera.pos = Vector2(0, 0)
 
-        self.save_window = UIWindow(Rect(250, 250, Constants.SCREEN_WIDTH - 500, Constants.SCREEN_HEIGHT - 500), self.app.manager, "Save")
+        self.save_window = UIWindow(Rect(150, 150, Constants.SCREEN_WIDTH - 300, 600), self.app.manager, "Save", object_id=ObjectID("#normal", "@save"))
         self.save_window.on_close_window_button_pressed = self.save_window.hide
         #Ok, now what goes in this?
         # Elements: #Ill fill in the exact types since I know them.
@@ -404,22 +404,22 @@ class Editor:
         #  - background (Something exists for this, will find soon): What background does the level have?
         #  - save (UIButton):
 
-        self.level_name = UITextEntryLine(Rect(10, 10, 100, 50), self.app.manager, self.save_window)
+        self.level_name = UITextEntryLine(Rect(10, 10, 100, 50), self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"))
 
-        a = UIPanel(Rect(10, 60, Constants.SCREEN_WIDTH - 514, 128), 1, self.app.manager, container=self.save_window)
+        a = UIPanel(Rect(10, 60, Constants.SCREEN_WIDTH - 514, 128), 1, self.app.manager, container=self.save_window, object_id=ObjectID("#normal", "@save"))
 
-        self.tag_add_name = UITextEntryLine(Rect(10, 10, Constants.SCREEN_WIDTH - 528 - 130, 24), self.app.manager, container=a)
-        UIButton(Rect(130, Constants.SCREEN_WIDTH - 528 - 120, 120, 24), "Add", self.app.manager, container=a, command=lambda: self.AddTag()) #Lack of thing. Also a was meant to be embeded in the window. It was just the panel to hold the tags.
-        self.tags_scroll = UIScrollingContainer(Rect(0, 0, Constants.SCREEN_WIDTH - 514, 100), self.app.manager, container=a)
+        self.tag_add_name = UITextEntryLine(Rect(10, 10, Constants.SCREEN_WIDTH - 528 - 130, 24), self.app.manager, container=a, object_id=ObjectID("#normal", "@save"))
+        UIButton(Rect(130, Constants.SCREEN_WIDTH - 528 - 120, 120, 24), "Add", self.app.manager, container=a, object_id=ObjectID("#normal", "@save"), command=lambda: self.AddTag()) #Lack of thing. Also a was meant to be embeded in the window. It was just the panel to hold the tags.
+        self.tags_scroll = UIScrollingContainer(Rect(0, 0, Constants.SCREEN_WIDTH - 514, 100), self.app.manager, container=a, object_id=ObjectID("#normal", "@save"))
         self.tags_list = [] # handles this evenutally
         #
-        self.growth_button = UIButton(Rect(10, 198, 100, 24), "Grow", self.app.manager, self.save_window, command=lambda: self.Grow())           # These should be in the same row
-        self.growth_direction = UIDropDownMenu(["Up", "Down", "Left", "Right"], "Up", Rect(110, 198, 100, 24), self.app.manager, self.save_window)  # These should be in the same row
-        self.growth_amount = UITextEntryLine(Rect(220, 198, Constants.SCREEN_WIDTH - 220 - 14, 24), self.app.manager, self.save_window, initial_text="0")    # These should be in the same row
+        self.growth_button = UIButton(Rect(10, 198, 100, 24), "Grow", self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), command=lambda: self.Grow())           # These should be in the same row
+        self.growth_direction = UIDropDownMenu(["Up", "Down", "Left", "Right"], "Up", Rect(110, 198, 100, 24), self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"))  # These should be in the same row
+        self.growth_amount = UITextEntryLine(Rect(220, 198, Constants.SCREEN_WIDTH - 220 - 14, 24), self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), initial_text="0")    # These should be in the same row
 
-        self.background = UIColorEntry(Rect(10, 232, 154, 52), 1, self.app.manager, container=self.save_window) # 154x52 trust me on this one.
-        UIButton(Rect(164, 232, 120, 52), "Apply", self.app.manager, self.save_window, command=lambda: self.ApplyBackground())
-        UIButton(Rect(10, 294, Constants.SCREEN_WIDTH - 514, 24), "Save", self.app.manager, self.save_window, command=lambda: self.SaveLevel()) # save button
+        self.background = UIColorEntry(Rect(10, 232, 154, 52), 1, self.app.manager, object_id=ObjectID("#normal", "@save"), container=self.save_window) # 154x52 trust me on this one.
+        UIButton(Rect(164, 232, 120, 52), "Apply", self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), command=lambda: self.ApplyBackground())
+        UIButton(Rect(10, 294, Constants.SCREEN_WIDTH - 514, 24), "Save", self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), command=lambda: self.SaveLevel()) # save button
         self.save_window.hide()
 
         side_panel = UIPanel(Rect((0, 0), (204, Constants.SCREEN_HEIGHT)), manager=self.app.manager, object_id=ObjectID("#side_panel", "@editor"))
@@ -449,13 +449,18 @@ class Editor:
         UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#save_icon", "@editor"), command=lambda: self.save_window.show())
 
         return not self.running, "Editor" #Test. I think.
-        
-        # No like run the thing.
-        # So we can see if it works.
-        # Hmm?
-        # Push real quick.
-        # So that I can see it.
 
+        #
+        # Ok, so... What the heck happened in theme.json to break it this bad.
+        # OK testing ready.
+        # Should have correct text size. I think.
+
+        # SO?
+        #...
+        # Text get funky?
+        # Weird.
+        #
+    #
 
     def SetCursorMode(self, cursor_mode: MouseMode):
         self.cursor_mode = cursor_mode

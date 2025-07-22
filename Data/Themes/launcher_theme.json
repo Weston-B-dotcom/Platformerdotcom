@@ -1,4 +1,16 @@
 {
+  "#theme": {
+    "font": {
+      "name": "montserrat",
+      "size": "16",
+      "bold": "1",
+      "italic": "0",
+      "regular_path": "Data/Fonts/Montserrat-Regular.ttf",
+      "bold_path": "Data/Fonts/Montserrat-Bold.ttf",
+      "italic_path": "Data/Fonts/Montserrat-Italic.ttf",
+      "bold_italic_path": "Data/Fonts/Montserrat-BoldItalic.ttf"
+    }
+  },
   "@main_menu": {
     "colours": {
       "regular_text": "#D0D0D0,#FFFFFF,#D050FF,90"

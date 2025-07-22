@@ -28,14 +28,14 @@ class UIColorEntry(UIPanel):
         visible: int = 1,
     ):
         super().__init__(relative_rect, starting_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
-        self.r_text = UITextEntryLine(Rect(0, 0, 75, 24), manager, container=self, initial_text="0")
-        self.r_slider = UIHorizontalSlider(Rect(0, 24, 75, 24), 0, (0, 255), manager, self)
+        self.r_text = UITextEntryLine(Rect(0, 0, 75, 24), manager, container=self, object_id=object_id, initial_text="0")
+        self.r_slider = UIHorizontalSlider(Rect(0, 24, 75, 24), 0, (0, 255), manager, self, object_id=object_id)
         self.red = 0
-        self.g_text = UITextEntryLine(Rect(75, 0, 75, 24), manager, container=self, initial_text="0")
-        self.g_slider = UIHorizontalSlider(Rect(75, 24, 75, 24), 0, (0, 255), manager, self)
+        self.g_text = UITextEntryLine(Rect(75, 0, 75, 24), manager, container=self, object_id=object_id, initial_text="0")
+        self.g_slider = UIHorizontalSlider(Rect(75, 24, 75, 24), 0, (0, 255), manager, self, object_id=object_id)
         self.green = 0
-        self.b_text = UITextEntryLine(Rect(150, 0, 75, 24), manager, container=self, initial_text="0")
-        self.b_slider = UIHorizontalSlider(Rect(150, 24, 75, 24), 0, (0, 255), manager, self)
+        self.b_text = UITextEntryLine(Rect(150, 0, 75, 24), manager, container=self, object_id=object_id, initial_text="0")
+        self.b_slider = UIHorizontalSlider(Rect(150, 24, 75, 24), 0, (0, 255), manager, self, object_id=object_id)
         self.blue = 0
 
     def ValidateRed(self, text: bool = True):
