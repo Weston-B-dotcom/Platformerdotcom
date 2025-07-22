@@ -1,3 +1,4 @@
+from pygame.key import ScancodeWrapper
 import pygame
 
 class Keybind:
@@ -7,6 +8,9 @@ class Keybind:
 
     def IsValid(self, mods: int, key: int) -> int:
         return self.mods.bit_count() if (key == self.key and mods & self.mods == self.mods) else -1
+    
+    def IsValidFor(self, mods: int, keys: ScancodeWrapper) -> int:
+        return self.mods.bit_count() if (keys[self.key] and mods & self.mods == self.mods) else -1
 
     def Rebind(self, rebinds: tuple[int|None, int|None]) -> None:
         self.mods = self.mods if rebinds[0] is None else rebinds[0]

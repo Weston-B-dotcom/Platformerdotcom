@@ -37,7 +37,7 @@ class MouseMode(Enum):
 def SnapToGrid(vector: Vector2, scale: int):
     return ((vector + Vector2(scale * 0.5, scale * 0.5)) // scale) * scale
 
-quack = [Keybinds.GRID_DECREASE_ONE, Keybinds.GRID_INCREASE_ONE, Keybinds.GRID_DECREASE_TEN, Keybinds.GRID_INCREASE_TEN]
+GRID_RESIZING_KEYBINDS = [Keybinds.GRID_DECREASE_ONE, Keybinds.GRID_INCREASE_ONE, Keybinds.GRID_DECREASE_TEN, Keybinds.GRID_INCREASE_TEN]
 
 class Editor:
     def __init__(self, app: Application|None = None, key = None):
@@ -146,7 +146,7 @@ class Editor:
                         dragging = DragType.NONE
                     case pygame.KEYDOWN:
                         if dragging == DragType.NONE or dragging == DragType.PANNING:
-                            thingy = sorted([(val, val.IsValid(mods, event.key)) for val in quack if val.IsValid(mods, event.key) > -1], key=lambda x: x[1], reverse=True)
+                            thingy = sorted([(val, val.IsValid(mods, event.key)) for val in GRID_RESIZING_KEYBINDS if val.IsValid(mods, event.key) > -1], key=lambda x: x[1], reverse=True)
                             if len(thingy) > 0:
                                 match thingy[0][0]:
                                     case Keybinds.GRID_DECREASE_ONE:
