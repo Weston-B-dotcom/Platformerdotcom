@@ -32,6 +32,48 @@ class Level:
             "background": self.background
         }
 
+    def Grow(self, amount: int, direction: str):
+        match direction:
+            case "Up":
+                # Good learning oppurtunity.
+                # Something unique happens when you grow upwards and to the left,
+                # The platforms are top left aligned, right?
+
+                # I'll take that as a yes.
+                # So if we grow to the left or grow up, then suddenly the old platform positions are wrong.
+                # However this is easily fixable.
+                # We simply add the amount grew to all the platforms positions.
+                self.size.y += amount
+
+                for platform in self.platforms:
+                    platform.rect.y += amount
+            case "Down":
+                self.size.y += amount
+            case "Left":
+                self.size.x += amount
+
+                for platform in self.platforms:
+                    platform.rect.x += amount
+            case "Right":
+                self.size.x += amount
+
+    def Shrink(self, amount: int, direction: str):
+        match direction:
+            case "Up":
+                self.size.y -= amount
+
+                for platform in self.platforms:
+                    platform.rect.y -= amount
+            case "Down":
+                self.size.y -= amount
+            case "Left":
+                self.size.x -= amount
+
+                for platform in self.platforms:
+                    platform.rect.x -= amount
+            case "Right":
+                self.size.x -= amount
+
     @classmethod
     def from_dict(cls, data: dictStrAny) -> "Level":
         return cls(data["name"], data["tags"], data["platforms"],

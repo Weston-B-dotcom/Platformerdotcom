@@ -24,6 +24,8 @@ class Keybinds:
     GRID_INCREASE_ONE: Keybind = Keybind(pygame.KMOD_LCTRL, pygame.K_RIGHT)
     GRID_DECREASE_TEN: Keybind = Keybind(pygame.KMOD_LCTRL | pygame.KMOD_LSHIFT, pygame.K_LEFT)
     GRID_INCREASE_TEN: Keybind = Keybind(pygame.KMOD_LCTRL | pygame.KMOD_LSHIFT, pygame.K_RIGHT)
+    UNDO: Keybind = Keybind(pygame.KMOD_LCTRL, pygame.K_z)
+    REDO: Keybind = Keybind(pygame.KMOD_LCTRL, pygame.K_y)
 
     @staticmethod
     def to_json() -> dict[str, tuple[int, int]]:
