@@ -1,5 +1,6 @@
 # Game Constants
 from typing import final
+from pygame import Vector2, Rect
 
 SCREEN_WIDTH: int = 1280
 SCREEN_HEIGHT: int = 720
@@ -16,6 +17,12 @@ PLAYER_SPEED: int = 5
 JUMP_STRENGTH: int = -15
 GRAVITY: float = 0.8
 
-#Game properties
-VERSION = "0.1.0.0"
+# Game properties
+VERSION: str = "0.1.0.0"
 """Major, Minor, Patch, Build"""
+
+# Editor Properties
+HANDLE_HALF_SIZE: Vector2 = Vector2(7, 7)
+HANDLE_SIZE: Vector2 = HANDLE_HALF_SIZE * 2 + Vector2(1, 1)
+ONE_VECTOR: Vector2 = Vector2(1, 1)
+ZERO_VECTOR: Vector2 = Vector2(0, 0)

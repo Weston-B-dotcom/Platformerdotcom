@@ -11,16 +11,24 @@ class Keybind:
     def Rebind(self, rebinds: tuple[int|None, int|None]) -> None:
         self.mods = self.mods if rebinds[0] is None else rebinds[0]
         self.key = self.key if rebinds[1] is None else rebinds[1]
+    
+    def Tuple(self) -> tuple[int, int]:
+        return (self.mods, self.key)
 
 class Keybinds:
-    UP: Keybind = Keybind(0, pygame.K_UP)
+    GRID_DECREASE_ONE: Keybind = Keybind(pygame.KMOD_LCTRL, pygame.K_LEFT)
+    GRID_INCREASE_ONE: Keybind = Keybind(pygame.KMOD_LCTRL, pygame.K_RIGHT)
+    GRID_DECREASE_TEN: Keybind = Keybind(pygame.KMOD_LCTRL & pygame.KMOD_LSHIFT, pygame.K_LEFT)
+    GRID_INCREASE_TEN: Keybind = Keybind(pygame.KMOD_LCTRL & pygame.KMOD_LSHIFT, pygame.K_RIGHT)
 
     @staticmethod
     def to_json() -> dict[str, tuple[int, int]]:
         return {
-            "up": (Keybinds.UP.mods, Keybinds.UP.key)
+            key.lower(): value.Tuple() for key, value in Keybinds.__dict__.items() if isinstance(value, Keybind)
         }
 
     @staticmethod
     def from_json(data: dict[str, tuple[int, int]]) -> None:
-        Keybinds.UP.Rebind(data.get("up", [None, None]))
+        for key, _ in Keybinds.__dict__.items():
+            if key.lower() in data:
+                Keybinds.__dict__[key].Rebind(data[key.lower()])

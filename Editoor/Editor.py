@@ -8,8 +8,9 @@ from Platform import Platform
 from DataValues import Constants, Assets
 from DataValues.TypeAliases import dictStrAny, dictStrStr, Tcolor
 from typing import Callable, Any
-import pygame, pygame_gui, json, pygame
+from Keybinds import Keybinds
 from enum import Enum, auto
+import pygame, pygame_gui, json, pygame
 
 class DragType(Enum):
     @staticmethod
@@ -21,6 +22,8 @@ class DragType(Enum):
     SELECT   = auto()
     CREATING = auto()
     DELETING = auto()
+    MOVING   = auto()
+    RESIZING = auto()
 
 class MouseMode(Enum):
     @staticmethod
@@ -49,10 +52,12 @@ class Editor:
     def run(self):
         dragging: DragType = DragType.NONE
         drag_pos: Vector2 = Vector2(0, 0)
+        platform_index: int = -1
 
         while self.running:
             self.app.StepDeltaTime()
-
+            mouse_level_pos: Vector2 = Vector2(pygame.mouse.get_pos()) + self.app.camera.pos
+            mouse_grid_pos = SnapToGrid(mouse_level_pos, self.grid_slider.get_current_value())
             mods = pygame.key.get_mods()
 
             for event in pygame.event.get():
@@ -70,14 +75,25 @@ class Editor:
                             elif mouse[2]:
                                 pygame.mouse.get_rel()
                                 dragging = DragType.SELECT
-                                drag_pos = SnapToGrid((Vector2(pygame.mouse.get_pos()) + self.app.camera.pos), self.grid_slider.get_current_value())
+                                drag_pos = mouse_grid_pos
                         if not stop:
                             match self.cursor_mode:
                                 case MouseMode.CURSOR:
-                                    ...
+                                    if mouse[0]:
+                                        drag_pos = mouse_grid_pos
+                                        for i, platform in enumerate(self.level.platforms):
+                                            if Rect(platform.rect.topleft - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE).collidepoint(drag_pos.x, drag_pos.y):
+                                                platform_index = i
+                                                dragging = DragType.MOVING
+                                                break
+                                            elif Rect(platform.rect.bottomright - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE).collidepoint(drag_pos.x, drag_pos.y):
+                                                pygame.mouse.get_rel()
+                                                platform_index = i
+                                                dragging = DragType.RESIZING
+                                                break
                                 case MouseMode.DELETE:
                                     if mouse[0]:
-                                        drag_pos = SnapToGrid((Vector2(pygame.mouse.get_pos()) + self.app.camera.pos), self.grid_slider.get_current_value())
+                                        drag_pos = mouse_grid_pos
                                         if mods & pygame.KMOD_LSHIFT:
                                             pygame.mouse.get_rel()
                                             dragging = DragType.DELETING
@@ -89,43 +105,65 @@ class Editor:
                                                     break
                                             if index != -1:
                                                 self.level.platforms.pop(index)
-
                                 case MouseMode.INSERT:
                                     if mouse[0]:
                                         pygame.mouse.get_rel()
                                         dragging = DragType.CREATING
-                                        drag_pos = SnapToGrid((Vector2(pygame.mouse.get_pos()) + self.app.camera.pos), self.grid_slider.get_current_value())
-
+                                        drag_pos = mouse_grid_pos
                     case pygame.MOUSEBUTTONUP:
                         match dragging:
+                            case DragType.MOVING:
+                                self.level.platforms[platform_index].rect.update(mouse_grid_pos.x, mouse_grid_pos.y, self.level.platforms[platform_index].rect.w, self.level.platforms[platform_index].rect.h)
+                                platform_index = -1
+                            case DragType.RESIZING:
+                                diff = mouse_grid_pos - drag_pos
+                                self.level.platforms[platform_index].Resize((self.level.platforms[platform_index].rect.w + diff.x, self.level.platforms[platform_index].rect.h + diff.y))
+                                platform_index = -1
                             case DragType.SELECT:
                                 ...
                             case DragType.CREATING:
-                                cur_pos = SnapToGrid((Vector2(pygame.mouse.get_pos()) + self.app.camera.pos), self.grid_slider.get_current_value())
-                                self.level.platforms.append(Platform((int(min(drag_pos.x, cur_pos.x)), int(min(drag_pos.y, cur_pos.y))), (int(abs(drag_pos.x - cur_pos.x)), int(abs(drag_pos.y - cur_pos.y))), (self.color.r, self.color.g, self.color.b)))
+                                x = int(min(drag_pos.x, mouse_grid_pos.x))
+                                y = int(min(drag_pos.y, mouse_grid_pos.y))
+                                w = int(abs(drag_pos.x - mouse_grid_pos.x))
+                                h = int(abs(drag_pos.y - mouse_grid_pos.y))
+                                if w != 0 and h != 0:
+                                    self.level.platforms.append(Platform((x, y), (w, h), (self.color.r, self.color.g, self.color.b)))
                             case DragType.DELETING:
-                                cur_pos = SnapToGrid((Vector2(pygame.mouse.get_pos()) + self.app.camera.pos), self.grid_slider.get_current_value())
-                                x = int(min(drag_pos.x, cur_pos.x))
-                                y = int(min(drag_pos.y, cur_pos.y))
-                                w = int(abs(drag_pos.x - cur_pos.x))
-                                h = int(abs(drag_pos.y - cur_pos.y))
+                                x = int(min(drag_pos.x, mouse_grid_pos.x))
+                                y = int(min(drag_pos.y, mouse_grid_pos.y))
+                                w = int(abs(drag_pos.x - mouse_grid_pos.x))
+                                h = int(abs(drag_pos.y - mouse_grid_pos.y))
                                 rect = Rect(x, y, w, h)
-                                print(rect)
+                                #print(rect)
                                 to_del = []
                                 for i, platform in enumerate(self.level.platforms):
                                     print(platform.rect)
                                     if platform.rect.colliderect(rect):
                                         to_del.append(i)
                                 to_del.reverse()
-                                print(to_del)
+                                #print(to_del)
                                 for i in to_del:
                                     self.level.platforms.pop(i)
                         dragging = DragType.NONE
+                    case pygame.KEYDOWN:
+                        if dragging == DragType.NONE or dragging == DragType.PANNING:
+                            match event.key:
+                                case Keybinds.GRID_DECREASE_ONE.key:
+                                    if Keybinds.GRID_DECREASE_ONE.IsValid(mods, event.key):
+                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 1, False)
+                                case Keybinds.GRID_INCREASE_ONE.key:
+                                    if Keybinds.GRID_INCREASE_ONE.IsValid(mods, event.key):
+                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 1, False)
+                                case Keybinds.GRID_DECREASE_TEN.key:
+                                    if Keybinds.GRID_DECREASE_TEN.IsValid(mods, event.key):
+                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 10, False)
+                                case Keybinds.GRID_INCREASE_TEN.key:
+                                    if Keybinds.GRID_INCREASE_TEN.IsValid(mods, event.key):
+                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 10, False)
                     case pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                         match event.ui_element:
                             case self.grid_slider:
                                 self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
-
 
                 self.app.manager.process_events(event)
 
@@ -139,21 +177,50 @@ class Editor:
             self.app.screen.fill(Assets.BLACK)
             #region Render the game
             level_origin_screen_pos: Vector2 = -self.app.camera.pos
-            mouse_level_pos: Vector2 = Vector2(pygame.mouse.get_pos()) + self.app.camera.pos
             box(self.app.screen, Rect(level_origin_screen_pos, self.level.size), self.level.background)
 
-            for platform in self.level.platforms:
-                new_rect = Rect(platform.rect.topleft + level_origin_screen_pos, platform.rect.size)
-                if -new_rect.w < new_rect.x < Constants.SCREEN_WIDTH and -new_rect.h < new_rect.y < Constants.SCREEN_HEIGHT:
-                    self.app.screen.blit(platform.image, new_rect)
+            if dragging == DragType.MOVING and platform_index != -1:
+                for platform in self.level.platforms:
+                    new_rect = Rect((mouse_grid_pos if platform == self.level.platforms[platform_index] else platform.rect.topleft) + level_origin_screen_pos, platform.rect.size)
+                    if -new_rect.w < new_rect.x < Constants.SCREEN_WIDTH and -new_rect.h < new_rect.y < Constants.SCREEN_HEIGHT:
+                        self.app.screen.blit(platform.image, new_rect)
+                        match self.cursor_mode:
+                            case MouseMode.CURSOR:
+                                box(self.app.screen, Rect(new_rect.topleft - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
+                                box(self.app.screen, Rect(new_rect.bottomright - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
+            elif dragging == DragType.RESIZING and platform_index != -1:
+                diff = mouse_grid_pos - drag_pos
+                for platform in self.level.platforms:
+                    new_rect = Rect(platform.rect.topleft + level_origin_screen_pos, platform.rect.size + diff if platform == self.level.platforms[platform_index] else platform.rect.size)
+                    if -new_rect.w < new_rect.x < Constants.SCREEN_WIDTH and -new_rect.h < new_rect.y < Constants.SCREEN_HEIGHT:
+                        surf = platform.image
+                        if self.level.platforms[platform_index] == platform:
+                            #print(f"Diff: {diff}\nSize: {platform.rect.size}\nNew Size: {platform.rect.size + diff}")
+                            surf = pygame.Surface(platform.rect.size + diff)
+                            surf.fill(platform.color)
+                        self.app.screen.blit(surf, new_rect)
+                        match self.cursor_mode:
+                            case MouseMode.CURSOR:
+                                box(self.app.screen, Rect(new_rect.topleft - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
+                                box(self.app.screen, Rect(new_rect.bottomright - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
+            else:
+                for platform in self.level.platforms:
+                    new_rect = Rect((platform.rect.topleft) + level_origin_screen_pos, platform.rect.size)
+                    if -new_rect.w < new_rect.x < Constants.SCREEN_WIDTH and -new_rect.h < new_rect.y < Constants.SCREEN_HEIGHT:
+                        self.app.screen.blit(platform.image, new_rect)
+                        match self.cursor_mode:
+                            case MouseMode.CURSOR:
+                                box(self.app.screen, Rect(new_rect.topleft - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
+                                box(self.app.screen, Rect(new_rect.bottomright - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
+
 
             match dragging:
                 case DragType.SELECT:
-                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, SnapToGrid(Vector2(pygame.mouse.get_pos()), self.grid_slider.get_current_value()) - (drag_pos + level_origin_screen_pos)), Assets.LIGHT_BLUE)
+                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, mouse_grid_pos - (drag_pos + level_origin_screen_pos)), Assets.LIGHT_BLUE)
                 case DragType.DELETING:
-                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, SnapToGrid(Vector2(pygame.mouse.get_pos()), self.grid_slider.get_current_value()) - (drag_pos + level_origin_screen_pos)), Assets.DARK_RED)
+                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, mouse_grid_pos - (drag_pos + level_origin_screen_pos)), Assets.DARK_RED)
                 case DragType.CREATING:
-                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, SnapToGrid(Vector2(pygame.mouse.get_pos()), self.grid_slider.get_current_value()) - (drag_pos + level_origin_screen_pos)), self.color)
+                    rectangle(self.app.screen, Rect(drag_pos + level_origin_screen_pos, mouse_grid_pos - (drag_pos + level_origin_screen_pos)), self.color)
             #endregion
             self.app.manager.draw_ui(self.app.screen)
 

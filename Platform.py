@@ -14,9 +14,14 @@ class Platform(Sprite):
         self.color = color
         self.points: list[platformPoint] = [] if points is None else points
         self.behavior = behavior
-        self.image = pygame.Surface(size)
+        self.image: pygame.Surface = pygame.Surface(size)
         self.image.fill(color)
         self.rect = self.image.get_rect(topleft=pos)
+
+    def Resize(self, new_size: pygame.Vector2):
+        self.image = pygame.Surface(new_size)
+        self.image.fill(self.color)
+        self.rect = self.image.get_rect(topleft=self.rect.topleft)
 
     def to_dict(self) -> dictStrAny:
         return {
