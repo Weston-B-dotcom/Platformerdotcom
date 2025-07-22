@@ -133,14 +133,11 @@ class Editor:
                                 w = int(abs(drag_pos.x - mouse_grid_pos.x))
                                 h = int(abs(drag_pos.y - mouse_grid_pos.y))
                                 rect = Rect(x, y, w, h)
-                                #print(rect)
                                 to_del = []
                                 for i, platform in enumerate(self.level.platforms):
-                                    print(platform.rect)
                                     if platform.rect.colliderect(rect):
                                         to_del.append(i)
                                 to_del.reverse()
-                                #print(to_del)
                                 for i in to_del:
                                     self.level.platforms.pop(i)
                         dragging = DragType.NONE
@@ -198,7 +195,6 @@ class Editor:
                     if -new_rect.w < new_rect.x < Constants.SCREEN_WIDTH and -new_rect.h < new_rect.y < Constants.SCREEN_HEIGHT:
                         surf = platform.image
                         if self.level.platforms[platform_index] == platform:
-                            #print(f"Diff: {diff}\nSize: {platform.rect.size}\nNew Size: {platform.rect.size + diff}")
                             surf = pygame.Surface(platform.rect.size + diff)
                             surf.fill(platform.color)
                         self.app.screen.blit(surf, new_rect)
@@ -208,7 +204,7 @@ class Editor:
                                 box(self.app.screen, Rect(new_rect.bottomright - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
             else:
                 for platform in self.level.platforms:
-                    new_rect = Rect((platform.rect.topleft) + level_origin_screen_pos, platform.rect.size)
+                    new_rect = Rect(platform.rect.topleft + level_origin_screen_pos, platform.rect.size)
                     if -new_rect.w < new_rect.x < Constants.SCREEN_WIDTH and -new_rect.h < new_rect.y < Constants.SCREEN_HEIGHT:
                         self.app.screen.blit(platform.image, new_rect)
                         match self.cursor_mode:
@@ -254,8 +250,8 @@ class Editor:
                 UIButton(Rect(i * 100, 0, 75, 75), f"{entry['text']}", self.app.manager, scrolling_container, object_id=ObjectID(f"{entry['id']}", "@editor"), command=ButtonMaker(entry['color']))
 
         UIButton(Rect(50, 50, 100, 100), "", self.app.manager, side_panel, object_id=ObjectID("#cursor_icon", "@editor"), command=lambda: self.SetCursorMode(MouseMode.CURSOR))
-        UIButton(Rect(50, 250, 100, 100), "DELETE", self.app.manager, side_panel, object_id=ObjectID("#icon", "@editor"), command=lambda: self.SetCursorMode(MouseMode.DELETE))
-        UIButton(Rect(50, 450, 100, 100), "INSERT", self.app.manager, side_panel, object_id=ObjectID("#icon", "@editor"), command=lambda: self.SetCursorMode(MouseMode.INSERT))
+        UIButton(Rect(50, 250, 100, 100), "", self.app.manager, side_panel, object_id=ObjectID("#trash_icon", "@editor"), command=lambda: self.SetCursorMode(MouseMode.DELETE))
+        UIButton(Rect(50, 450, 100, 100), "", self.app.manager, side_panel, object_id=ObjectID("#insert_icon", "@editor"), command=lambda: self.SetCursorMode(MouseMode.INSERT))
 
         return not self.running, "Editor"
 

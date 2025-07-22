@@ -17,7 +17,7 @@ class Keybind:
         self.key = self.key if rebinds[1] is None else rebinds[1]
     
     def Tuple(self) -> tuple[int, int]:
-        return (self.mods, self.key)
+        return self.mods, self.key
 
 class Keybinds:
     GRID_DECREASE_ONE: Keybind = Keybind(pygame.KMOD_LCTRL, pygame.K_LEFT)
