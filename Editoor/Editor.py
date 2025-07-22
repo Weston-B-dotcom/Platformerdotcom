@@ -57,26 +57,19 @@ class Editor:
         while self.running:
             self.app.StepDeltaTime()
             mouse_level_pos: Vector2 = Vector2(pygame.mouse.get_pos()) + self.app.camera.pos
-            mouse_grid_pos = SnapToGrid(mouse_level_pos, self.grid_slider.get_current_value())
-            mods = pygame.key.get_mods()
+            mouse_grid_pos: Vector2 = SnapToGrid(mouse_level_pos, self.grid_slider.get_current_value())
+            mods: int = pygame.key.get_mods()
 
             for event in pygame.event.get():
                 match event.type:
                     case pygame.QUIT:
                         self.running = False
                     case pygame.MOUSEBUTTONDOWN:
-                        stop = False
                         mouse = pygame.mouse.get_pressed()
-                        if mods & pygame.KMOD_LALT:
-                            if mouse[0]:
-                                pygame.mouse.get_rel()
-                                dragging = DragType.PANNING
-                                stop = True
-                            elif mouse[2]:
-                                pygame.mouse.get_rel()
-                                dragging = DragType.SELECT
-                                drag_pos = mouse_grid_pos
-                        if not stop:
+                        if mouse[0] and mods & pygame.KMOD_LALT:
+                            pygame.mouse.get_rel()
+                            dragging = DragType.PANNING
+                        else:
                             match self.cursor_mode:
                                 case MouseMode.CURSOR:
                                     if mouse[0]:
@@ -91,6 +84,10 @@ class Editor:
                                                 platform_index = i
                                                 dragging = DragType.RESIZING
                                                 break
+                                    elif mouse[2] and mods & pygame.KMOD_LALT:
+                                        pygame.mouse.get_rel()
+                                        dragging = DragType.SELECT
+                                        drag_pos = mouse_grid_pos
                                 case MouseMode.DELETE:
                                     if mouse[0]:
                                         drag_pos = mouse_grid_pos
@@ -147,19 +144,18 @@ class Editor:
                         dragging = DragType.NONE
                     case pygame.KEYDOWN:
                         if dragging == DragType.NONE or dragging == DragType.PANNING:
-                            match event.key:
-                                case Keybinds.GRID_DECREASE_ONE.key:
-                                    if Keybinds.GRID_DECREASE_ONE.IsValid(mods, event.key):
-                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 1, False)
-                                case Keybinds.GRID_INCREASE_ONE.key:
-                                    if Keybinds.GRID_INCREASE_ONE.IsValid(mods, event.key):
-                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 1, False)
-                                case Keybinds.GRID_DECREASE_TEN.key:
-                                    if Keybinds.GRID_DECREASE_TEN.IsValid(mods, event.key):
-                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 10, False)
-                                case Keybinds.GRID_INCREASE_TEN.key:
-                                    if Keybinds.GRID_INCREASE_TEN.IsValid(mods, event.key):
-                                        self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 10, False)
+                                if Keybinds.GRID_DECREASE_ONE.IsValid(mods, event.key):
+                                    self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 1, False)
+                                    self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
+                                elif Keybinds.GRID_INCREASE_ONE.IsValid(mods, event.key):
+                                    self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 1, False)
+                                    self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
+                                elif Keybinds.GRID_DECREASE_TEN.IsValid(mods, event.key):
+                                    self.grid_slider.set_current_value(self.grid_slider.get_current_value() - 10, False)
+                                    self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
+                                elif Keybinds.GRID_INCREASE_TEN.IsValid(mods, event.key):
+                                    self.grid_slider.set_current_value(self.grid_slider.get_current_value() + 10, False)
+                                    self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
                     case pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                         match event.ui_element:
                             case self.grid_slider:
@@ -171,6 +167,8 @@ class Editor:
             match dragging:
                 case DragType.PANNING:
                     self.app.camera.pos -= Vector2(pygame.mouse.get_rel())
+                    mouse_level_pos = Vector2(pygame.mouse.get_pos()) + self.app.camera.pos
+                    mouse_grid_pos = SnapToGrid(mouse_level_pos, self.grid_slider.get_current_value())
             #endregion
             self.app.manager.update(self.app.delta_time)
 
