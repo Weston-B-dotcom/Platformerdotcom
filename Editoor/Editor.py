@@ -409,7 +409,7 @@ class Editor:
         a = UIPanel(Rect(10, 60, Constants.SCREEN_WIDTH - 514, 128), 1, self.app.manager, container=self.save_window, object_id=ObjectID("#normal", "@save"))
 
         self.tag_add_name = UITextEntryLine(Rect(10, 10, Constants.SCREEN_WIDTH - 528 - 130, 24), self.app.manager, container=a, object_id=ObjectID("#normal", "@save"))
-        UIButton(Rect(130, Constants.SCREEN_WIDTH - 528 - 120, 120, 24), "Add", self.app.manager, container=a, object_id=ObjectID("#normal", "@save"), command=lambda: self.AddTag()) #Lack of thing. Also a was meant to be embeded in the window. It was just the panel to hold the tags.
+        UIButton(Rect(130, Constants.SCREEN_WIDTH - 528 - 120, 120, 24), "Add Tag", self.app.manager, container=a, object_id=ObjectID("#normal", "@save"), command=lambda: self.AddTag()) #Lack of thing. Also a was meant to be embeded in the window. It was just the panel to hold the tags.
         self.tags_scroll = UIScrollingContainer(Rect(0, 0, Constants.SCREEN_WIDTH - 514, 100), self.app.manager, container=a, object_id=ObjectID("#normal", "@save"))
         self.tags_list = [] # handles this evenutally
         #
@@ -441,26 +441,14 @@ class Editor:
             for i, entry in enumerate(json.load(file).get("Materials", [])):
                 UIButton(Rect(i * 100, 0, 75, 75), f"{entry['text']}", self.app.manager, scrolling_container, object_id=ObjectID(f"{entry['id']}", "@editor"), command=ButtonMaker(entry['color']))
 
-        UIButton(Rect(0, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#undo_icon", "@editor"), command=lambda: self.undo())
-        UIButton(Rect(50, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#redo_icon", "@editor"), command=lambda: self.redo())
-        UIButton(Rect(100, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#cursor_icon", "@editor"), command=lambda: self.SetCursorMode(MouseMode.CURSOR))
-        UIButton(Rect(150, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#trash_icon", "@editor"), command=lambda: self.SetCursorMode(MouseMode.DELETE))
-        UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#insert_icon", "@editor"), command=lambda: self.SetCursorMode(MouseMode.INSERT))
-        UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#save_icon", "@editor"), command=lambda: self.save_window.show())
+        UIButton(Rect(0, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#undo_icon", "@round_big_button"), command=lambda: self.undo())
+        UIButton(Rect(50, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#redo_icon", "@round_big_button"), command=lambda: self.redo())
+        UIButton(Rect(100, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#cursor_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.CURSOR))
+        UIButton(Rect(150, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#trash_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.DELETE))
+        UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#insert_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.INSERT))
+        UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#save_icon", "@round_big_button"), command=lambda: self.save_window.show())
 
-        return not self.running, "Editor" #Test. I think.
-
-        #
-        # Ok, so... What the heck happened in theme.json to break it this bad.
-        # OK testing ready.
-        # Should have correct text size. I think.
-
-        # SO?
-        #...
-        # Text get funky?
-        # Weird.
-        #
-    #
+        return not self.running, "Editor" # Ok now push.
 
     def SetCursorMode(self, cursor_mode: MouseMode):
         self.cursor_mode = cursor_mode

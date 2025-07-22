@@ -42,12 +42,12 @@ def main():
     panel.border_colour = Assets.BLACK
     panel.background_colour = Assets.LIGHT_GRAY
     UITextBox("Platformer<font color=#000000>dot</font>com", Rect(60, 17, Constants.SCREEN_WIDTH - 124, 80), uiManager, container=panel, object_id=ObjectID("#title", "@main_menu"))
-    play = UIButton(Rect(60, 97, Constants.SCREEN_WIDTH - 124, 80), "Play Game", uiManager, panel, object_id=ObjectID("#play", "@main_menu"), command=lambda: m_RunGame())
+    play = UIButton(Rect(60, 97, Constants.SCREEN_WIDTH - 124, 80), "Play Game", uiManager, panel, object_id=ObjectID("#play", "@main_menu_button"), command=lambda: m_RunGame())
     play.set_tooltip(text="Uh... Plays the game?", delay=30)
-    UIButton(Rect(60, 197, Constants.SCREEN_WIDTH - 124, 80), "Editor", uiManager, panel, "You get to create your own levels and use other people's levels!", object_id=ObjectID("#editor", "@main_menu"), command=lambda: m_RunEditor())
-    UIButton(Rect(60, 297, Constants.SCREEN_WIDTH - 124, 80), "Achievements", uiManager, panel, "Take a look at your hard work!", object_id=ObjectID("#achievements", "@main_menu"), command=lambda: m_RunAchievement())
-    UIButton(Rect(60, 397, Constants.SCREEN_WIDTH - 124, 80), "Debug Panel", uiManager, panel, "Early bird gets the worm...", object_id=ObjectID("#debug", "@main_menu"), command=lambda: m_RunDebug())
-    UIButton(Rect(60, 497, Constants.SCREEN_WIDTH - 124, 80), "Porter", uiManager, panel, "Teleporter!!! (jk it for updates :3)", object_id=ObjectID("#porter", "@main_menu"), command=lambda: m_RunPorter())
+    UIButton(Rect(60, 197, Constants.SCREEN_WIDTH - 124, 80), "Editor", uiManager, panel, "You get to create your own levels and use other people's levels!", object_id=ObjectID("#editor", "@main_menu_button"), command=lambda: m_RunEditor())
+    UIButton(Rect(60, 297, Constants.SCREEN_WIDTH - 124, 80), "Achievements", uiManager, panel, "Take a look at your hard work!", object_id=ObjectID("#achievements", "@main_menu_button"), command=lambda: m_RunAchievement())
+    UIButton(Rect(60, 397, Constants.SCREEN_WIDTH - 124, 80), "Debug Panel", uiManager, panel, "Early bird gets the worm...", object_id=ObjectID("#debug", "@main_menu_button"), command=lambda: m_RunDebug())
+    UIButton(Rect(60, 497, Constants.SCREEN_WIDTH - 124, 80), "Porter", uiManager, panel, "Teleporter!!! (jk it for updates :3)", object_id=ObjectID("#porter", "@main_menu_button"), command=lambda: m_RunPorter())
 
     app: Application = Application(Constants.VERSION, screen, uiManager, clock)
     edit: Editor = Editor(app)
