@@ -1,4 +1,13 @@
 from pygame import Color
+from TextureData import TextureData
+
+# Textuers
+class Textures:
+    CHECKPOINT_TEXTURE: TextureData
+
+    @staticmethod
+    def LoadStaticTextures():
+        Textures.CHECKPOINT_TEXTURE = TextureData.load("Data/Images/checkpoint.png")
 
 # Colors
 WHITE:      Color = Color(255, 255, 255)

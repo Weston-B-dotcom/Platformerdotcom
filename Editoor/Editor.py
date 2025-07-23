@@ -22,13 +22,14 @@ class DragType(Enum):
     def _generate_next_value_(name: str, start: int, count: int, last_values: list) -> Any:
         return count
 
-    NONE     = auto()
-    PANNING  = auto()
-    SELECT   = auto()
-    CREATING = auto()
-    DELETING = auto()
-    MOVING   = auto()
-    RESIZING = auto()
+    NONE              = auto()
+    PANNING           = auto()
+    SELECT            = auto()
+    CREATING          = auto()
+    DELETING          = auto()
+    MOVING            = auto()
+    RESIZING          = auto()
+    CHECKPOINT_MOVING = auto()
 
 class MouseMode(Enum):
     @staticmethod
@@ -48,10 +49,14 @@ class ChangeType(Enum):
     def _generate_next_value_(name: str, start: int, count: int, last_values: list) -> Any:
         return count
 
-    CREATE = auto()
-    DELETE = auto()
-    MOVE   = auto()
-    RESIZE = auto()
+    PLATFORM_CREATE   = auto()
+    PLATFORM_DELETE   = auto()
+    PLATFORM_MOVE     = auto()
+    PLATFORM_RESIZE   = auto()
+    CHECKPOINT_CREATE = auto()
+    CHECKPOINT_DELETE = auto()
+    CHECKPOINT_MOVE   = auto()
+    
 
 class ChangeInfo: # <- This makes it easier if we have a class to hold change info.
     def __init__(self, change_type: ChangeType, data: dictStrAny):
@@ -117,13 +122,13 @@ class Editor:
         #print(self.changes)
         change: ChangeInfo = self.changes[self.change_index]
         match change.change_type:
-            case ChangeType.CREATE:
+            case ChangeType.PLATFORM_CREATE:
                 self.level.platforms.pop()
-            case ChangeType.DELETE:
+            case ChangeType.PLATFORM_DELETE:
                 self.level.platforms.insert(change.data["platform"], Platform.from_dict(change.data["data"]))
-            case ChangeType.MOVE:
+            case ChangeType.PLATFORM_MOVE:
                 self.level.platforms[change.data["platform"]].rect.update(change.data["old_pos"], self.level.platforms[change.data["platform"]].rect.size)
-            case ChangeType.RESIZE:
+            case ChangeType.PLATFORM_RESIZE:
                 self.level.platforms[change.data["platform"]].Resize(Vector2(change.data["old_pos"]))
         self.change_index -= 1
 
@@ -139,13 +144,13 @@ class Editor:
         #print(self.changes)
         change: ChangeInfo = self.changes[self.change_index]
         match change.change_type:
-            case ChangeType.CREATE:
+            case ChangeType.PLATFORM_CREATE:
                 self.level.platforms.append(Platform.from_dict(change.data["data"]))
-            case ChangeType.DELETE:
+            case ChangeType.PLATFORM_DELETE:
                 self.level.platforms.pop(change.data["platform"])
-            case ChangeType.MOVE:
+            case ChangeType.PLATFORM_MOVE:
                 self.level.platforms[change.data["platform"]].rect.update(change.data["new_pos"], self.level.platforms[change.data["platform"]].rect.size)
-            case ChangeType.RESIZE:
+            case ChangeType.PLATFORM_RESIZE:
                 self.level.platforms[change.data["platform"]].Resize(Vector2(change.data["new_pos"]))
 
     def AddToStack(self, change: ChangeInfo):
@@ -165,6 +170,7 @@ class Editor:
         dragging: DragType = DragType.NONE
         drag_pos: Vector2 = Vector2(0, 0)
         platform_index: int = -1
+        checkpoint_index: int = -1
 
         while self.running:
             self.app.StepDeltaTime()
@@ -187,11 +193,25 @@ class Editor:
                                 case MouseMode.CHECKPOINT:
                                     if mouse[0]:
                                         if mods & pygame.KMOD_LSHIFT:
-                                            ...
+                                            drag_pos = mouse_grid_pos
+                                            for i, checkpoint in enumerate(self.level.checkpoints):
+                                                if Assets.Textures.CHECKPOINT_TEXTURE.texture.get_rect(center=(checkpoint)).collidepoint(mouse_grid_pos.x, mouse_grid_pos.y):
+                                                    checkpoint_index = i
+                                                    dragging = DragType.CHECKPOINT_MOVING
+                                                    break
                                         else:
                                             ...
                                     elif mouse[2]:
-                                        ...
+                                        index = -1
+                                        for i, checkpoint in enumerate(self.level.checkpoints):
+                                            if Assets.Textures.CHECKPOINT_TEXTURE.texture.get_rect(center=(checkpoint)).collidepoint(mouse_grid_pos.x, mouse_grid_pos.y):
+                                                index = i
+                                                break
+                                        if index != -1:
+                                            self.AddToStack(ChangeInfo(ChangeType.CHECKPOINT_DELETE, {
+                                                "checkpoint": index,
+                                                "data": self.level.checkpoints.pop(index)
+                                            }))
                                 case MouseMode.CURSOR:
                                     if mouse[0]:
                                         drag_pos = mouse_grid_pos
@@ -222,7 +242,7 @@ class Editor:
                                                     index = i
                                                     break
                                             if index != -1:
-                                                self.AddToStack(ChangeInfo(ChangeType.DELETE, {
+                                                self.AddToStack(ChangeInfo(ChangeType.PLATFORM_DELETE, {
                                                     "platform": index,
                                                     "data": self.level.platforms.pop(index).to_dict()
                                                 }))
@@ -234,7 +254,7 @@ class Editor:
                     case pygame.MOUSEBUTTONUP:
                         match dragging:
                             case DragType.MOVING:
-                                self.AddToStack(ChangeInfo(ChangeType.RESIZE, {
+                                self.AddToStack(ChangeInfo(ChangeType.PLATFORM_RESIZE, {
                                     "platform": platform_index,
                                     "old_pos": self.level.platforms[platform_index].rect.topleft,
                                     "new_pos": mouse_grid_pos
@@ -243,7 +263,7 @@ class Editor:
                                 platform_index = -1
                             case DragType.RESIZING:
                                 diff = mouse_grid_pos - drag_pos
-                                self.AddToStack(ChangeInfo(ChangeType.RESIZE, {
+                                self.AddToStack(ChangeInfo(ChangeType.PLATFORM_RESIZE, {
                                     "platform": platform_index,
                                     "old_size": self.level.platforms[platform_index].rect.size,
                                     "new_size": (self.level.platforms[platform_index].rect.w + diff.x, self.level.platforms[platform_index].rect.h + diff.y)
@@ -259,7 +279,7 @@ class Editor:
                                 h = int(abs(drag_pos.y - mouse_grid_pos.y))
                                 if w != 0 and h != 0:
                                     self.level.platforms.append(Platform((x, y), (w, h), (self.color.r, self.color.g, self.color.b)))
-                                    self.AddToStack(ChangeInfo(ChangeType.CREATE, {
+                                    self.AddToStack(ChangeInfo(ChangeType.PLATFORM_CREATE, {
                                         "data": self.level.platforms[-1].to_dict()
                                     }))
                             case DragType.DELETING:
@@ -274,7 +294,7 @@ class Editor:
                                         to_del.append(i)
                                 to_del.reverse()
                                 for i in to_del:
-                                    self.AddToStack(ChangeInfo(ChangeType.DELETE, {
+                                    self.AddToStack(ChangeInfo(ChangeType.PLATFORM_DELETE, {
                                         "platform": i,
                                         "data": self.level.platforms.pop(i).to_dict()
                                     }))
@@ -356,7 +376,10 @@ class Editor:
                             case MouseMode.CURSOR:
                                 box(self.app.screen, Rect(new_rect.topleft - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
                                 box(self.app.screen, Rect(new_rect.bottomright - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE), Assets.DARK_GRAY)
-
+            
+            match self.cursor_mode:
+                case MouseMode.CHECKPOINT:
+                    self.app.screen.fblits([Assets.Textures.CHECKPOINT_TEXTURE.texture, Assets.Textures.CHECKPOINT_TEXTURE.texture.get_rect(center=(pt.x + level_origin_screen_pos.x, pt.y + level_origin_screen_pos.y)) for pt in self.level.checkpoints])
 
             match dragging:
                 case DragType.SELECT:

@@ -86,4 +86,4 @@ class Level:
 
     @classmethod
     def new_level(cls, name: str) -> "Level":
-        return cls(name, [], [], {})
+        return cls(name, [], [], {}, [])
