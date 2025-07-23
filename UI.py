@@ -11,7 +11,7 @@ import pygame, pygame_gui
 
 class UIColorEntry(UIPanel):
     """
-    154x52
+    229x52
     """
     def __init__(
         self,

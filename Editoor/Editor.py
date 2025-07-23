@@ -1,6 +1,7 @@
 from pygame_gui.elements import UIPanel, UIButton, UITextBox, UIScrollingContainer, UIHorizontalSlider, UILabel, \
     UIWindow, UITextEntryLine, UIDropDownMenu
 from pygame_gui.core import ObjectID
+from pygame_gui.windows import UIFileDialog
 from pygame import Rect, Color, Vector2
 from pygame.gfxdraw import rectangle, box
 from Application import Application
@@ -34,9 +35,10 @@ class MouseMode(Enum):
     def _generate_next_value_(name: str, start: int, count: int, last_values: list) -> Any:
         return count
 
-    CURSOR = auto()
-    DELETE = auto()
-    INSERT = auto()
+    CURSOR     = auto()
+    DELETE     = auto()
+    INSERT     = auto()
+    CHECKPOINT = auto()
 
 def SnapToGrid(vector: Vector2, scale: int):
     return ((vector + Vector2(scale * 0.5, scale * 0.5)) // scale) * scale
@@ -182,6 +184,14 @@ class Editor:
                             break
                         else:
                             match self.cursor_mode:
+                                case MouseMode.CHECKPOINT:
+                                    if mouse[0]:
+                                        if mods & pygame.KMOD_LSHIFT:
+                                            ...
+                                        else:
+                                            ...
+                                    elif mouse[2]:
+                                        ...
                                 case MouseMode.CURSOR:
                                     if mouse[0]:
                                         drag_pos = mouse_grid_pos
@@ -275,7 +285,7 @@ class Editor:
                         elif Keybinds.UNDO.IsValid(mods, event.key):
                             self.undo()
                         elif dragging == DragType.NONE or dragging == DragType.PANNING:
-                            thingy = sorted([(val, val.IsValid(mods, event.key)) for val in GRID_RESIZING_KEYBINDS if val.IsValid(mods, event.key) > -1], key=lambda x: x[1], reverse=True)
+                            thingy = sorted([(val, val.IsValid(mods, event.key)) for val in GRID_RESIZING_KEYBINDS if val.IsValid(mods, event.key) > -1], key=lambda z: z[1], reverse=True)
                             if len(thingy) > 0:
                                 match thingy[0][0]:
                                     case Keybinds.GRID_DECREASE_ONE:
@@ -294,6 +304,9 @@ class Editor:
                         match event.ui_element:
                             case self.grid_slider:
                                 self.grid_slider_label.set_text(f"Grid: {self.grid_slider.get_current_value()}")
+                    case pygame_gui.UI_FILE_DIALOG_PATH_PICKED:
+                        with open(event.text, "w") as file:
+                            json.dump(self.level.to_dict(), file)
 
                 self.app.manager.process_events(event)
 
@@ -359,12 +372,34 @@ class Editor:
 
         # Ok, let's add a way to open this menu, then test if stuff is doing stuff.
 
+    def PopTag(self, index: int):
+        self.tags_list.pop(index)
+
     def AddTag(self):
-        self.tags_list.append(UIButton(Rect(0, 0, 127, 24), self.tag_add_name.get_text(), self.app.manager, self.tags_scroll))
-        self.RefreshTags()
+        def GenDelTag(name: str):
+            def DelTag():
+                index = -1
+                for i, rag in enumerate(self.tags_list):
+                    print(f"{i} - {rag.text}/{name}")
+                    if rag.text == name:
+                        print("match")
+                        index = i
+                        break
+                if index != -1:
+                    print("Pop")
+                    self.PopTag(index)
+                    print("Refresh")
+                    self.RefreshTags()
+            return DelTag
+
+        tag = self.tag_add_name.get_text()
+        if tag.strip() != "" and tag not in map(lambda x: x.text, self.tags_list):
+            self.tags_list.append(UIButton(Rect(0, 0, 127, 24), tag, self.app.manager, self.tags_scroll, command=GenDelTag(tag)))
+            self.RefreshTags()
 
     def RefreshTags(self):
         # This should just be list stuff.
+        print("Refreshed")
         MAX_LIST_WIDTH = Constants.SCREEN_WIDTH - 518
         list_width = 127 # Width of individual tags, since then you can fit 7.
         for i in range(len(self.tags_list)):
@@ -380,11 +415,14 @@ class Editor:
                 self.level.Grow(abs_amount, self.growth_direction.selected_option)
             elif amount < 0:
                 self.level.Shrink(abs_amount, self.growth_direction.selected_option)
-        finally:
+        except Exception as _:
+
             ...
 
     def SaveLevel(self):
-        ...
+        self.level.name = self.level_name.get_text()
+        UIFileDialog(Rect((0, 0), Constants.SCREEN_SIZE), self.app.manager, "Save level as:", {".json"}, "./Mods/level.json")
+
 
     def ApplyBackground(self):
         self.level.background = (self.background.red, self.background.green, self.background.blue)
@@ -408,17 +446,17 @@ class Editor:
 
         a = UIPanel(Rect(10, 60, Constants.SCREEN_WIDTH - 514, 128), 1, self.app.manager, container=self.save_window, object_id=ObjectID("#normal", "@save"))
 
-        self.tag_add_name = UITextEntryLine(Rect(10, 10, Constants.SCREEN_WIDTH - 528 - 130, 24), self.app.manager, container=a, object_id=ObjectID("#normal", "@save"))
-        UIButton(Rect(130, Constants.SCREEN_WIDTH - 528 - 120, 120, 24), "Add Tag", self.app.manager, container=a, object_id=ObjectID("#normal", "@save"), command=lambda: self.AddTag()) #Lack of thing. Also a was meant to be embeded in the window. It was just the panel to hold the tags.
-        self.tags_scroll = UIScrollingContainer(Rect(0, 0, Constants.SCREEN_WIDTH - 514, 100), self.app.manager, container=a, object_id=ObjectID("#normal", "@save"))
-        self.tags_list = [] # handles this evenutally
-        #
+        self.tag_add_name = UITextEntryLine(Rect(10, 0, Constants.SCREEN_WIDTH - 528 - 130, 24), self.app.manager, container=a, object_id=ObjectID("#normal", "@save"))
+        UIButton(Rect(Constants.SCREEN_WIDTH - 528 - 120, 0, 120, 24), "Add Tag", self.app.manager, container=a, object_id=ObjectID("#normal", "@save"), command=lambda: self.AddTag()) #Lack of thing. Also a was meant to be embeded in the window. It was just the panel to hold the tags.
+        self.tags_scroll = UIScrollingContainer(Rect(0, 24, Constants.SCREEN_WIDTH - 514, 100), self.app.manager, container=a, object_id=ObjectID("#normal", "@save"))
+        self.tags_list = []
+
         self.growth_button = UIButton(Rect(10, 198, 100, 24), "Grow", self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), command=lambda: self.Grow())           # These should be in the same row
         self.growth_direction = UIDropDownMenu(["Up", "Down", "Left", "Right"], "Up", Rect(110, 198, 100, 24), self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"))  # These should be in the same row
         self.growth_amount = UITextEntryLine(Rect(220, 198, Constants.SCREEN_WIDTH - 220 - 14, 24), self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), initial_text="0")    # These should be in the same row
 
-        self.background = UIColorEntry(Rect(10, 232, 154, 52), 1, self.app.manager, object_id=ObjectID("#normal", "@save"), container=self.save_window) # 154x52 trust me on this one.
-        UIButton(Rect(164, 232, 120, 52), "Apply", self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), command=lambda: self.ApplyBackground())
+        self.background = UIColorEntry(Rect(10, 232, 229, 52), 1, self.app.manager, object_id=ObjectID("#normal", "@save"), container=self.save_window) # 154x52 trust me on this one.
+        UIButton(Rect(239, 232, 120, 52), "Apply", self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), command=lambda: self.ApplyBackground())
         UIButton(Rect(10, 294, Constants.SCREEN_WIDTH - 514, 24), "Save", self.app.manager, self.save_window, object_id=ObjectID("#normal", "@save"), command=lambda: self.SaveLevel()) # save button
         self.save_window.hide()
 
@@ -441,12 +479,21 @@ class Editor:
             for i, entry in enumerate(json.load(file).get("Materials", [])):
                 UIButton(Rect(i * 100, 0, 75, 75), f"{entry['text']}", self.app.manager, scrolling_container, object_id=ObjectID(f"{entry['id']}", "@editor"), command=ButtonMaker(entry['color']))
 
-        UIButton(Rect(0, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#undo_icon", "@round_big_button"), command=lambda: self.undo())
-        UIButton(Rect(50, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#redo_icon", "@round_big_button"), command=lambda: self.redo())
-        UIButton(Rect(100, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#cursor_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.CURSOR))
-        UIButton(Rect(150, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#trash_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.DELETE))
-        UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#insert_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.INSERT))
-        UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#save_icon", "@round_big_button"), command=lambda: self.save_window.show())
+        for i, (object_id, func) in enumerate([
+            ("#undo_icon", lambda: self.undo()),
+            ("#redo_icon", lambda: self.redo()),
+            ("#cursor_icon", lambda: self.SetCursorMode(MouseMode.CURSOR)),
+            ("#trash_icon", lambda: self.SetCursorMode(MouseMode.DELETE)),
+            ("#insert_icon", lambda: self.SetCursorMode(MouseMode.INSERT)),
+            ("#save_icon", lambda: self.save_window.show())]):
+            UIButton(Rect((i % 4) * 50, ((i // 4) * 50) + 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID(object_id, "@round_big_button"), command=func)
+
+        #UIButton(Rect(0, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#undo_icon", "@round_big_button"), command=lambda: self.undo())
+        #UIButton(Rect(50, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#redo_icon", "@round_big_button"), command=lambda: self.redo())
+        #UIButton(Rect(100, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#cursor_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.CURSOR))
+        #UIButton(Rect(150, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#trash_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.DELETE))
+        #UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#insert_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.INSERT))
+        #UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#save_icon", "@round_big_button"), command=lambda: self.save_window.show())
 
         return not self.running, "Editor" # Ok now push.
 
