@@ -1,11 +1,11 @@
 from DataValues import Constants, Assets
-from DataValues.TypeAliases import Tcolor, dictStrAny
+from DataValues.TypeAliases import Tcolor, dictStrAny, Tvec2
 from Platform import Platform
 from Interaction import Interaction
 from pygame import Vector2
 
 class Level:
-    def __init__(self, name: str, tags: list[str], platforms: list[Platform], interactions: dict[str, list[Interaction]], checkpoints: list[tuple], size: Vector2 = Vector2(Constants.SCREEN_SIZE), background: Tcolor = Assets.BLACK):
+    def __init__(self, name: str, tags: list[str], platforms: list[Platform], interactions: dict[str, list[Interaction]], checkpoints: list[Tvec2], size: Vector2 = Vector2(Constants.SCREEN_SIZE), background: Tcolor = Assets.BLACK):
         self.name = name
         self.tags = tags
         self.size: Vector2 = size

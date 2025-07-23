@@ -9,6 +9,7 @@ import pygame
 
 def main():
     pygame.init()
+    Assets.Textures.LoadStaticTextures()
     screen: Surface = pygame.display.set_mode(Constants.SCREEN_SIZE)
     #Constants.SCREEN_SIZE = screen.get_size()
     #Constants.SCREEN_WIDTH = screen.get_width()

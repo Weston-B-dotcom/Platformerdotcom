@@ -130,6 +130,12 @@ class Editor:
                 self.level.platforms[change.data["platform"]].rect.update(change.data["old_pos"], self.level.platforms[change.data["platform"]].rect.size)
             case ChangeType.PLATFORM_RESIZE:
                 self.level.platforms[change.data["platform"]].Resize(Vector2(change.data["old_pos"]))
+            case ChangeType.CHECKPOINT_CREATE:
+                self.level.checkpoints.pop()
+            case ChangeType.CHECKPOINT_DELETE:
+                self.level.checkpoints.insert(change.data["checkpoint"], change.data["data"])
+            case ChangeType.CHECKPOINT_MOVE:
+                self.level.platforms[change.data["checkpoint"]] = change.data["old_pos"]
         self.change_index -= 1
 
     def redo(self):
@@ -152,6 +158,12 @@ class Editor:
                 self.level.platforms[change.data["platform"]].rect.update(change.data["new_pos"], self.level.platforms[change.data["platform"]].rect.size)
             case ChangeType.PLATFORM_RESIZE:
                 self.level.platforms[change.data["platform"]].Resize(Vector2(change.data["new_pos"]))
+            case ChangeType.CHECKPOINT_CREATE:
+                self.level.checkpoints.append(change.data["data"])
+            case ChangeType.CHECKPOINT_DELETE:
+                self.level.checkpoints.pop(change.data["checkpoint"])
+            case ChangeType.CHECKPOINT_MOVE:
+                self.level.checkpoints[change.data["checkpoint"]] = change.data["new_pos"]
 
     def AddToStack(self, change: ChangeInfo):
         #print("Pre stack: ")
@@ -183,6 +195,8 @@ class Editor:
                     case pygame.QUIT:
                         self.running = False
                     case pygame.MOUSEBUTTONDOWN:
+                        if pygame.mouse.get_pos()[0] < 200 or pygame.mouse.get_pos()[1] > Constants.SCREEN_HEIGHT - 200 or self.save_window.visible:
+                            break
                         mouse = pygame.mouse.get_pressed()
                         if mouse[0] and mods & pygame.KMOD_LALT:
                             pygame.mouse.get_rel()
@@ -200,7 +214,10 @@ class Editor:
                                                     dragging = DragType.CHECKPOINT_MOVING
                                                     break
                                         else:
-                                            ...
+                                            self.level.checkpoints.append((mouse_grid_pos.x, mouse_grid_pos.y))
+                                            self.AddToStack(ChangeInfo(ChangeType.CHECKPOINT_CREATE, {
+                                                "data": self.level.checkpoints[-1]
+                                            }))
                                     elif mouse[2]:
                                         index = -1
                                         for i, checkpoint in enumerate(self.level.checkpoints):
@@ -254,13 +271,21 @@ class Editor:
                     case pygame.MOUSEBUTTONUP:
                         match dragging:
                             case DragType.MOVING:
-                                self.AddToStack(ChangeInfo(ChangeType.PLATFORM_RESIZE, {
+                                self.AddToStack(ChangeInfo(ChangeType.PLATFORM_MOVE, {
                                     "platform": platform_index,
                                     "old_pos": self.level.platforms[platform_index].rect.topleft,
                                     "new_pos": mouse_grid_pos
                                 }))
                                 self.level.platforms[platform_index].rect.update(mouse_grid_pos.x, mouse_grid_pos.y, self.level.platforms[platform_index].rect.w, self.level.platforms[platform_index].rect.h)
                                 platform_index = -1
+                            case DragType.CHECKPOINT_MOVING:
+                                self.AddToStack(ChangeInfo(ChangeType.CHECKPOINT_MOVE, {
+                                    "checkpoint": checkpoint_index,
+                                    "old_pos": self.level.checkpoints[checkpoint_index],
+                                    "new_pos": (mouse_grid_pos.x, mouse_grid_pos.y)
+                                }))
+                                self.level.checkpoints[checkpoint_index] = (mouse_grid_pos.x, mouse_grid_pos.y)
+                                checkpoint_index = -1
                             case DragType.RESIZING:
                                 diff = mouse_grid_pos - drag_pos
                                 self.AddToStack(ChangeInfo(ChangeType.PLATFORM_RESIZE, {
@@ -379,7 +404,7 @@ class Editor:
             
             match self.cursor_mode:
                 case MouseMode.CHECKPOINT:
-                    self.app.screen.fblits([Assets.Textures.CHECKPOINT_TEXTURE.texture, Assets.Textures.CHECKPOINT_TEXTURE.texture.get_rect(center=(pt.x + level_origin_screen_pos.x, pt.y + level_origin_screen_pos.y)) for pt in self.level.checkpoints])
+                    self.app.screen.fblits([(Assets.Textures.CHECKPOINT_TEXTURE.texture, Assets.Textures.CHECKPOINT_TEXTURE.texture.get_rect(center=(pt[0] + level_origin_screen_pos[0], pt[1] + level_origin_screen_pos[1]))) for pt in self.level.checkpoints])
 
             match dragging:
                 case DragType.SELECT:
@@ -506,8 +531,9 @@ class Editor:
             ("#undo_icon", lambda: self.undo()),
             ("#redo_icon", lambda: self.redo()),
             ("#cursor_icon", lambda: self.SetCursorMode(MouseMode.CURSOR)),
-            ("#trash_icon", lambda: self.SetCursorMode(MouseMode.DELETE)),
+            ("#cursor_icon", lambda: self.SetCursorMode(MouseMode.CHECKPOINT)),
             ("#insert_icon", lambda: self.SetCursorMode(MouseMode.INSERT)),
+            ("#trash_icon", lambda: self.SetCursorMode(MouseMode.DELETE)),
             ("#save_icon", lambda: self.save_window.show())]):
             UIButton(Rect((i % 4) * 50, ((i // 4) * 50) + 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID(object_id, "@round_big_button"), command=func)
 
