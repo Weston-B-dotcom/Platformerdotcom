@@ -7,7 +7,7 @@ class Keybind:
         self.key = key
 
     def IsValid(self, mods: int, key: int) -> int:
-        return self.mods.bit_count() if (key == self.key and mods & self.mods == self.mods) else -1
+        return self.mods.bit_count() if (key == self.key and (mods & self.mods) == self.mods) else -1
     
     def IsValidFor(self, mods: int, keys: ScancodeWrapper) -> int:
         return self.mods.bit_count() if (keys[self.key] and mods & self.mods == self.mods) else -1

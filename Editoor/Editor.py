@@ -195,79 +195,78 @@ class Editor:
                     case pygame.QUIT:
                         self.running = False
                     case pygame.MOUSEBUTTONDOWN:
-                        if pygame.mouse.get_pos()[0] < 200 or pygame.mouse.get_pos()[1] > Constants.SCREEN_HEIGHT - 200 or self.save_window.visible:
-                            break
-                        mouse = pygame.mouse.get_pressed()
-                        if mouse[0] and mods & pygame.KMOD_LALT:
-                            pygame.mouse.get_rel()
-                            dragging = DragType.PANNING
-                            break
-                        else:
-                            match self.cursor_mode:
-                                case MouseMode.CHECKPOINT:
-                                    if mouse[0]:
-                                        if mods & pygame.KMOD_LSHIFT:
-                                            drag_pos = mouse_grid_pos
+                        print(f"{pygame.mouse.get_pos()[0]} | {pygame.mouse.get_pos()[1]} | {self.save_window.visible}")
+                        if not (pygame.mouse.get_pos()[0] < 204 or pygame.mouse.get_pos()[1] > Constants.SCREEN_HEIGHT - 150 or self.save_window.visible):
+                            mouse = pygame.mouse.get_pressed()
+                            if mouse[0] and mods & pygame.KMOD_LALT:
+                                pygame.mouse.get_rel()
+                                dragging = DragType.PANNING
+                            else:
+                                match self.cursor_mode:
+                                    case MouseMode.CHECKPOINT:
+                                        if mouse[0]:
+                                            if mods & pygame.KMOD_LSHIFT:
+                                                drag_pos = mouse_grid_pos
+                                                for i, checkpoint in enumerate(self.level.checkpoints):
+                                                    if Assets.Textures.CHECKPOINT_TEXTURE.texture.get_rect(center=(checkpoint)).collidepoint(mouse_grid_pos.x, mouse_grid_pos.y):
+                                                        checkpoint_index = i
+                                                        dragging = DragType.CHECKPOINT_MOVING
+                                                        break
+                                            else:
+                                                self.level.checkpoints.append((mouse_grid_pos.x, mouse_grid_pos.y))
+                                                self.AddToStack(ChangeInfo(ChangeType.CHECKPOINT_CREATE, {
+                                                    "data": self.level.checkpoints[-1]
+                                                }))
+                                        elif mouse[2]:
+                                            index = -1
                                             for i, checkpoint in enumerate(self.level.checkpoints):
                                                 if Assets.Textures.CHECKPOINT_TEXTURE.texture.get_rect(center=(checkpoint)).collidepoint(mouse_grid_pos.x, mouse_grid_pos.y):
-                                                    checkpoint_index = i
-                                                    dragging = DragType.CHECKPOINT_MOVING
-                                                    break
-                                        else:
-                                            self.level.checkpoints.append((mouse_grid_pos.x, mouse_grid_pos.y))
-                                            self.AddToStack(ChangeInfo(ChangeType.CHECKPOINT_CREATE, {
-                                                "data": self.level.checkpoints[-1]
-                                            }))
-                                    elif mouse[2]:
-                                        index = -1
-                                        for i, checkpoint in enumerate(self.level.checkpoints):
-                                            if Assets.Textures.CHECKPOINT_TEXTURE.texture.get_rect(center=(checkpoint)).collidepoint(mouse_grid_pos.x, mouse_grid_pos.y):
-                                                index = i
-                                                break
-                                        if index != -1:
-                                            self.AddToStack(ChangeInfo(ChangeType.CHECKPOINT_DELETE, {
-                                                "checkpoint": index,
-                                                "data": self.level.checkpoints.pop(index)
-                                            }))
-                                case MouseMode.CURSOR:
-                                    if mouse[0]:
-                                        drag_pos = mouse_grid_pos
-                                        for i, platform in enumerate(self.level.platforms):
-                                            if Rect(platform.rect.topleft - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE).collidepoint(drag_pos.x, drag_pos.y):
-                                                platform_index = i
-                                                dragging = DragType.MOVING
-                                                break
-                                            elif Rect(platform.rect.bottomright - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE).collidepoint(drag_pos.x, drag_pos.y):
-                                                pygame.mouse.get_rel()
-                                                platform_index = i
-                                                dragging = DragType.RESIZING
-                                                break
-                                    elif mouse[2] and mods & pygame.KMOD_LALT:
-                                        pygame.mouse.get_rel()
-                                        dragging = DragType.SELECT
-                                        drag_pos = mouse_grid_pos
-                                case MouseMode.DELETE:
-                                    if mouse[0]:
-                                        drag_pos = mouse_grid_pos
-                                        if mods & pygame.KMOD_LSHIFT:
-                                            pygame.mouse.get_rel()
-                                            dragging = DragType.DELETING
-                                        else:
-                                            index = -1
-                                            for i, platform in enumerate(self.level.platforms):
-                                                if platform.rect.collidepoint(drag_pos.x, drag_pos.y):
                                                     index = i
                                                     break
                                             if index != -1:
-                                                self.AddToStack(ChangeInfo(ChangeType.PLATFORM_DELETE, {
-                                                    "platform": index,
-                                                    "data": self.level.platforms.pop(index).to_dict()
+                                                self.AddToStack(ChangeInfo(ChangeType.CHECKPOINT_DELETE, {
+                                                    "checkpoint": index,
+                                                    "data": self.level.checkpoints.pop(index)
                                                 }))
-                                case MouseMode.INSERT:
-                                    if mouse[0]:
-                                        pygame.mouse.get_rel()
-                                        dragging = DragType.CREATING
-                                        drag_pos = mouse_grid_pos
+                                    case MouseMode.CURSOR:
+                                        if mouse[0]:
+                                            drag_pos = mouse_grid_pos
+                                            for i, platform in enumerate(self.level.platforms):
+                                                if Rect(platform.rect.topleft - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE).collidepoint(drag_pos.x, drag_pos.y):
+                                                    platform_index = i
+                                                    dragging = DragType.MOVING
+                                                    break
+                                                elif Rect(platform.rect.bottomright - Constants.HANDLE_HALF_SIZE, Constants.HANDLE_SIZE).collidepoint(drag_pos.x, drag_pos.y):
+                                                    pygame.mouse.get_rel()
+                                                    platform_index = i
+                                                    dragging = DragType.RESIZING
+                                                    break
+                                        elif mouse[2] and mods & pygame.KMOD_LALT:
+                                            pygame.mouse.get_rel()
+                                            dragging = DragType.SELECT
+                                            drag_pos = mouse_grid_pos
+                                    case MouseMode.DELETE:
+                                        if mouse[0]:
+                                            drag_pos = mouse_grid_pos
+                                            if mods & pygame.KMOD_LSHIFT:
+                                                pygame.mouse.get_rel()
+                                                dragging = DragType.DELETING
+                                            else:
+                                                index = -1
+                                                for i, platform in enumerate(self.level.platforms):
+                                                    if platform.rect.collidepoint(drag_pos.x, drag_pos.y):
+                                                        index = i
+                                                        break
+                                                if index != -1:
+                                                    self.AddToStack(ChangeInfo(ChangeType.PLATFORM_DELETE, {
+                                                        "platform": index,
+                                                        "data": self.level.platforms.pop(index).to_dict()
+                                                    }))
+                                    case MouseMode.INSERT:
+                                        if mouse[0]:
+                                            pygame.mouse.get_rel()
+                                            dragging = DragType.CREATING
+                                            drag_pos = mouse_grid_pos
                     case pygame.MOUSEBUTTONUP:
                         match dragging:
                             case DragType.MOVING:
@@ -325,12 +324,20 @@ class Editor:
                                     }))
                         dragging = DragType.NONE
                     case pygame.KEYDOWN: # Test it
-                        if Keybinds.REDO.IsValid(mods, event.key):
+                        #print(f"Ours:  {mods} | {event.key}")
+                        #print(f"Undo:  {Keybinds.UNDO.mods} | {Keybinds.UNDO.key}")
+                        #print(f"Redo:  {Keybinds.REDO.mods} | {Keybinds.REDO.key}")
+                        #print(f"GDOn:  {Keybinds.GRID_DECREASE_ONE.mods} | {Keybinds.GRID_DECREASE_ONE.key} | {Keybinds.GRID_DECREASE_ONE.IsValid(mods, event.key)}")
+                        #print(f"GIOn:  {Keybinds.GRID_INCREASE_ONE.mods} | {Keybinds.GRID_INCREASE_ONE.key} | {Keybinds.GRID_INCREASE_ONE.IsValid(mods, event.key)}")
+                        #print(f"GDTe:  {Keybinds.GRID_DECREASE_TEN.mods} | {Keybinds.GRID_DECREASE_TEN.key} | {Keybinds.GRID_DECREASE_TEN.IsValid(mods, event.key)}")
+                        #print(f"GITe:  {Keybinds.GRID_INCREASE_TEN.mods} | {Keybinds.GRID_INCREASE_TEN.key} | {Keybinds.GRID_INCREASE_TEN.IsValid(mods, event.key)}")
+                        if Keybinds.REDO.IsValid(mods, event.key) != -1:
                             self.redo()
-                        elif Keybinds.UNDO.IsValid(mods, event.key):
+                        elif Keybinds.UNDO.IsValid(mods, event.key) != -1:
                             self.undo()
                         elif dragging == DragType.NONE or dragging == DragType.PANNING:
                             thingy = sorted([(val, val.IsValid(mods, event.key)) for val in GRID_RESIZING_KEYBINDS if val.IsValid(mods, event.key) > -1], key=lambda z: z[1], reverse=True)
+                            #print(thingy)
                             if len(thingy) > 0:
                                 match thingy[0][0]:
                                     case Keybinds.GRID_DECREASE_ONE:
