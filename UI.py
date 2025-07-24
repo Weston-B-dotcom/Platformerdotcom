@@ -38,6 +38,21 @@ class UIColorEntry(UIPanel):
         self.b_slider = UIHorizontalSlider(Rect(300, 24, 150, 24), 0, (0, 255), manager, self, object_id=object_id)
         self.blue = 0
 
+    def SetR(self, value: int):
+        self.red = min(max(0, value), 255)
+        self.r_text.set_text(f"{self.red}")
+        self.r_slider.set_current_value(self.red)
+        
+    def SetG(self, value: int):
+        self.green = min(max(0, value), 255)
+        self.g_text.set_text(f"{self.green}")
+        self.g_slider.set_current_value(self.green)
+        
+    def SetB(self, value: int):
+        self.blue = min(max(0, value), 255)
+        self.b_text.set_text(f"{self.blue}")
+        self.b_slider.set_current_value(self.blue)
+
     def ValidateRed(self, text: bool = True):
         value = self.red
         if text:
@@ -48,9 +63,7 @@ class UIColorEntry(UIPanel):
         else:
             value = self.r_slider.get_current_value()
 
-        self.red = min(max(0, value), 255)
-        self.r_text.set_text(f"{self.red}")
-        self.r_slider.set_current_value(self.red)
+        self.SetR(value)
 
     def ValidateGreen(self, text: bool = True):
         value = self.green
@@ -62,9 +75,7 @@ class UIColorEntry(UIPanel):
         else:
             value = self.g_slider.get_current_value()
 
-        self.green = min(max(0, value), 255)
-        self.g_text.set_text(f"{self.green}")
-        self.g_slider.set_current_value(self.green)
+        self.SetG(value)
 
     def ValidateBlue(self, text: bool = True):
         value = self.blue
@@ -76,9 +87,7 @@ class UIColorEntry(UIPanel):
         else:
             value = self.b_slider.get_current_value()
 
-        self.blue = min(max(0, value), 255)
-        self.b_text.set_text(f"{self.blue}")
-        self.b_slider.set_current_value(self.blue)
+        self.SetB(value)
 
     def process_event(self, event: pygame.event.Event):
         super().process_event(event)

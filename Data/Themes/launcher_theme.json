@@ -11,6 +11,14 @@
       "bold_italic_path": "Data/Fonts/Montserrat-BoldItalic.ttf"
     }
   },
+  "@code_terminal_panel": {
+    "misc": {
+        "shape": "rectangle",
+        "shape_corner_radius": "4",
+        "border_width": "0",
+        "shadow_width": "0"
+    }
+  },
   "@main_menu": {
     "colours": {
       "regular_text": "#D0D0D0,#FFFFFF,#D050FF,90"

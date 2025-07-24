@@ -12,7 +12,16 @@ from typing import Callable, Any
 from Keybinds import Keybinds
 from enum import Enum, auto
 from UI import UIColorEntry
+from .CodingTerminal import UICodingTerminal
 import pygame, pygame_gui, json, pygame
+
+class ScreenType(Enum):
+    @staticmethod
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list) -> Any:
+        return count
+
+    NONE   = auto()
+    CODING = auto()
 
 class DragType(Enum):
     @staticmethod
@@ -40,6 +49,39 @@ class MouseMode(Enum):
 
 def SnapToGrid(vector: Vector2, scale: int):
     return ((vector + Vector2(scale * 0.5, scale * 0.5)) // scale) * scale
+
+@staticmethod
+def _scale_image_to_fit(image: pygame.Surface, target_size: tuple[int, int]) -> pygame.Surface:
+    """
+    Scale an image to fit within the target size while maintaining aspect ratio.
+    The image will be scaled to the largest size that fits within the target dimensions.
+
+    :param image: The image surface to scale.
+    :param target_size: The target size (width, height) to fit the image within.
+    :return: The scaled image surface.
+    """
+    if image is None:
+        return None
+
+    image_width, image_height = image.get_size()
+    target_width, target_height = target_size
+
+    # Calculate scale factors for both dimensions
+    scale_x = target_width / image_width
+    scale_y = target_height / image_height
+
+    # Use the smaller scale factor to ensure the image fits within the target size
+    scale = min(scale_x, scale_y)
+
+    # Calculate new dimensions
+    new_width = int(image_width * scale)
+    new_height = int(image_height * scale)
+
+    # Scale the image
+    if new_width > 0 and new_height > 0:
+        return pygame.transform.scale(image, (new_width, new_height))
+    else:
+        return image
 
 class ChangeType(Enum):
     @staticmethod
@@ -96,6 +138,7 @@ class Editor:
         self.growth_amount: UITextEntryLine = None
         self.background: UIColorEntry = None
         self.path_type: PathType = None 
+        self.code_terminal: UICodingTerminal = None
 
         #region Doc
         # In theory we could add branching in the future.
@@ -366,13 +409,16 @@ class Editor:
                             case PathType.LOAD:
                                 with open(event.text, "r") as file:
                                     self.level = Level.from_dict(json.load(file))
-                                    self.background = self.level.background
                                 while len(self.tags_list) > 0:
                                     self.tags_list[-1].kill()
                                     self.tags_list.pop()
                                 for tag in self.level.tags:
                                     self.AddTagNoRebuild(tag)
                                 self.RefreshTags()
+                                self.level_name.set_text(self.level.name)
+                                self.background.SetR(self.level.background.r)
+                                self.background.SetG(self.level.background.g)
+                                self.background.SetB(self.level.background.b)
 
                 self.app.manager.process_events(event)
 
@@ -445,24 +491,19 @@ class Editor:
         self.tags_list[index].kill()
         self.tags_list.pop(index)
 
-    def AddTagNoRebuild(self):
+    def AddTagNoRebuild(self, tag: str):
         def GenDelTag(name: str):
             def DelTag():
                 index = -1
                 for i, rag in enumerate(self.tags_list):
-                    #print(f"{i} - {rag.text}/{name}")
                     if rag.text == name:
-                        #print("match")
                         index = i
                         break
                 if index != -1:
-                    #print("Pop")
                     self.PopTag(index)
-                    #print("Refresh")
                     self.RefreshTags()
             return DelTag
 
-        tag = self.tag_add_name.get_text()
         if tag.strip() != "" and tag not in map(lambda x: x.text, self.tags_list):
             self.tags_list.append(UIButton(Rect(0, 0, 127, 24), tag, self.app.manager, self.tags_scroll, command=GenDelTag(tag)))
 
@@ -511,6 +552,7 @@ class Editor:
             ...
 
     def SaveLevel(self):
+        self.level.tags = [tag.text for tag in self.tags_list]
         self.level.name = self.level_name.get_text()
         self.path_type = PathType.SAVE
         UIFileDialog(Rect((0, 0), Constants.SCREEN_SIZE), self.app.manager, "Save level as:", {".json"}, "./Mods/level.json")
@@ -562,6 +604,8 @@ class Editor:
 
         #UITextBox("Editor", Rect(12, 7, Constants.SCREEN_WIDTH - 124, 50), self.app.manager, object_id=ObjectID("#sub_title", "@editor"))
 
+        self.code_terminal = UICodingTerminal(Rect(204, 0, Constants.SCREEN_WIDTH - 204, Constants.SCREEN_HEIGHT - 150), manager=self.app.manager)
+
         UITextBox("Materials:", Rect(0, 0, Constants.SCREEN_WIDTH - 204, 50), self.app.manager, container=ui_panel, object_id=ObjectID("#ui_panel", "@editor"))
         scrolling_container = UIScrollingContainer(Rect(20, 60, Constants.SCREEN_WIDTH - 204, 150), self.app.manager, container=ui_panel, should_grow_automatically=True)
 
@@ -573,6 +617,10 @@ class Editor:
         with open("Game/Materials.json", "r") as file:
             for i, entry in enumerate(json.load(file).get("Materials", [])):
                 UIButton(Rect(i * 100, 0, 75, 75), f"{entry['text']}", self.app.manager, scrolling_container, object_id=ObjectID(f"{entry['id']}", "@editor"), command=ButtonMaker(entry['color']))
+
+        
+        
+        UIButton._scale_image_to_fit = _scale_image_to_fit
 
         for i, (object_id, func) in enumerate([
             ("#undo_icon", self.undo),

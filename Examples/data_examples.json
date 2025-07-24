@@ -24,7 +24,7 @@
                   "interaction_type": "literal_value",
                   "data": {
                     "value": "x",
-                    "type": ""
+                    "type": "string"
                   }
                 },
                 {

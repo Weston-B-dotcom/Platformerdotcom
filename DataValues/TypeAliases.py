@@ -8,6 +8,7 @@ dictStrStr: TypeAlias = dict[str, str]
 #region Wrappers
 Tvec2: TypeAlias = tuple[int, int]
 Tcolor: TypeAlias = tuple[int, int, int]
+Trect: TypeAlias = tuple[int, int, int, int]
 #endregion
 
 #region Info Tuples
