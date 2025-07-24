@@ -14,14 +14,18 @@ class Instance:
         self.mods = mods
         self.version = version
         self.data = data
-        self.stages = []
+        self.stages: dict[str, int] = {}
         self.start_level: str = ""
         self.current_level: str = ""
 
     def load_mods(self):
+        # TODO: Implement This.
         ...
 
     def load_stages(self):
+        ...
+
+    def SetStage(self, stage_id: str, checkpoint: int = 0):
         ...
 
     def to_json(self):

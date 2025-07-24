@@ -142,7 +142,7 @@ def parseInteraction(interaction: Interaction, instance: Instance, player: Playe
                     return instance.data[interaction.data["key"]]
             return None
         case InteractionType.set_stage:
-            instance.current_level = parseInteraction(interaction.args[0], instance, player, level)
+            instance.SetStage(parseInteraction(interaction.args[0], instance, player, level), parseInteraction(interaction.args[1], instance, player, level) if len(interaction.args >= 2) else 0)
             return None
         case InteractionType.get_stage:
             return level.name

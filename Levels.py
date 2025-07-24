@@ -2,10 +2,10 @@ from DataValues import Constants, Assets
 from DataValues.TypeAliases import Tcolor, dictStrAny, Tvec2
 from Platform import Platform
 from Interaction import Interaction
-from pygame import Vector2
+from pygame import Vector2, Color
 
 class Level:
-    def __init__(self, name: str, tags: list[str], platforms: list[Platform], interactions: dict[str, list[Interaction]], checkpoints: list[Tvec2], size: Vector2 = Vector2(Constants.SCREEN_SIZE), background: Tcolor = Assets.BLACK):
+    def __init__(self, name: str, tags: list[str], platforms: list[Platform], interactions: dict[str, list[Interaction]], checkpoints: list[Tvec2], size: Vector2 = Vector2(Constants.SCREEN_SIZE), background: Color = Assets.BLACK):
         self.name = name
         self.tags = tags
         self.size: Vector2 = size
@@ -22,7 +22,7 @@ class Level:
         return {
             "name": self.name,
             "tags": self.tags,
-            "size": self.size,
+            "size": [self.size.x, self.size.y],
             "platforms": [platform.to_dict() for platform in self.platforms],
             "interactions": {
                 "top_collision": [inter.to_dict() for inter in self.top_collision_interactions],
@@ -31,20 +31,12 @@ class Level:
                 "frame": [inter.to_dict() for inter in self.frame_interactions]
             },
             "checkpoints": self.checkpoints,
-            "background": self.background
+            "background": [self.background.r, self.background.g, self.background.b]
         }
 
     def Grow(self, amount: int, direction: str):
         match direction:
             case "Up":
-                # Good learning oppurtunity.
-                # Something unique happens when you grow upwards and to the left,
-                # The platforms are top left aligned, right?
-
-                # I'll take that as a yes.
-                # So if we grow to the left or grow up, then suddenly the old platform positions are wrong.
-                # However this is easily fixable.
-                # We simply add the amount grew to all the platforms positions.
                 self.size.y += amount
 
                 for platform in self.platforms:
@@ -78,11 +70,9 @@ class Level:
 
     @classmethod
     def from_dict(cls, data: dictStrAny) -> "Level":
-        return cls(data["name"], data["tags"],
-        [Platform.from_dict(platform) for platform in data["platforms"]],
-        {
-            inter_type: [Interaction.from_dict(inter) for inter in inters] for inter_type, inters in data.get("interactions", {})
-        }, data["checkpoints"], data["size"], data["background"])
+        return cls(data["name"], data["tags"], [Platform.from_dict(platform) for platform in data["platforms"]], {
+            inter_type: [Interaction.from_dict(inter) for inter in inters] for inter_type, inters in data.get("interactions", {"top_collision": [], "bottom_collision": [], "side_collision": [], "frame": []}).items()
+        }, data["checkpoints"], Vector2(data["size"]), Color(data["background"]))
 
     @classmethod
     def new_level(cls, name: str) -> "Level":

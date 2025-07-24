@@ -11,7 +11,7 @@ import pygame, pygame_gui
 
 class UIColorEntry(UIPanel):
     """
-    229x52
+    454x52
     """
     def __init__(
         self,
@@ -28,22 +28,22 @@ class UIColorEntry(UIPanel):
         visible: int = 1,
     ):
         super().__init__(relative_rect, starting_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=object_id, anchors=anchors, visible=visible)
-        self.r_text = UITextEntryLine(Rect(0, 0, 75, 24), manager, container=self, object_id=object_id, initial_text="0")
-        self.r_slider = UIHorizontalSlider(Rect(0, 24, 75, 24), 0, (0, 255), manager, self, object_id=object_id)
+        self.r_text = UITextEntryLine(Rect(0, 0, 150, 24), manager, container=self, object_id=object_id, initial_text="0")
+        self.r_slider = UIHorizontalSlider(Rect(0, 24, 150, 24), 0, (0, 255), manager, self, object_id=object_id)
         self.red = 0
-        self.g_text = UITextEntryLine(Rect(75, 0, 75, 24), manager, container=self, object_id=object_id, initial_text="0")
-        self.g_slider = UIHorizontalSlider(Rect(75, 24, 75, 24), 0, (0, 255), manager, self, object_id=object_id)
+        self.g_text = UITextEntryLine(Rect(150, 0, 150, 24), manager, container=self, object_id=object_id, initial_text="0")
+        self.g_slider = UIHorizontalSlider(Rect(150, 24, 150, 24), 0, (0, 255), manager, self, object_id=object_id)
         self.green = 0
-        self.b_text = UITextEntryLine(Rect(150, 0, 75, 24), manager, container=self, object_id=object_id, initial_text="0")
-        self.b_slider = UIHorizontalSlider(Rect(150, 24, 75, 24), 0, (0, 255), manager, self, object_id=object_id)
+        self.b_text = UITextEntryLine(Rect(300, 0, 150, 24), manager, container=self, object_id=object_id, initial_text="0")
+        self.b_slider = UIHorizontalSlider(Rect(300, 24, 150, 24), 0, (0, 255), manager, self, object_id=object_id)
         self.blue = 0
 
     def ValidateRed(self, text: bool = True):
         value = self.red
         if text:
             try:
-                value = int(self.r_text.get_text())
-            finally:
+                value = int(self.r_text.get_text().strip())
+            except Exception as _:
                 value = self.red
         else:
             value = self.r_slider.get_current_value()
@@ -56,8 +56,8 @@ class UIColorEntry(UIPanel):
         value = self.green
         if text:
             try:
-                value = int(self.g_text.get_text())
-            finally:
+                value = int(self.g_text.get_text().strip())
+            except Exception as _:
                 value = self.green
         else:
             value = self.g_slider.get_current_value()
@@ -70,8 +70,8 @@ class UIColorEntry(UIPanel):
         value = self.blue
         if text:
             try:
-                value = int(self.b_text.get_text())
-            finally:
+                value = int(self.b_text.get_text().strip())
+            except Exception as _:
                 value = self.blue
         else:
             value = self.b_slider.get_current_value()
@@ -84,7 +84,11 @@ class UIColorEntry(UIPanel):
         super().process_event(event)
         if self is not None:
             match event.type:
+                case pygame_gui.UI_TEXT_ENTRY_CHANGED:
+                    #print("Change")
+                    ...
                 case pygame_gui.UI_TEXT_ENTRY_FINISHED:
+                    #print("Finished")
                     match event.ui_element:
                         case self.r_text:
                             self.ValidateRed(True)
@@ -93,6 +97,7 @@ class UIColorEntry(UIPanel):
                         case self.b_text:
                             self.ValidateBlue(True)
                 case pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
+                    #print("Slider")
                     match event.ui_element:
                         case self.r_slider:
                             self.ValidateRed(False)
