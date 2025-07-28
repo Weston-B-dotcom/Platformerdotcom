@@ -21,6 +21,7 @@ class ScreenType(Enum):
         return count
 
     NONE   = auto()
+    LEVEL  = auto()
     CODING = auto()
 
 class DragType(Enum):
@@ -126,6 +127,7 @@ class Editor:
         self.grid_slider_label: UILabel = None
         self.save_window: UIWindow = None
         self.cursor_mode: MouseMode = MouseMode.CURSOR
+        self.screen: ScreenType = ScreenType.LEVEL
         self.changes: list[ChangeInfo] = []
         self.change_index: int = -1
 
@@ -241,7 +243,7 @@ class Editor:
                         self.running = False
                     case pygame.MOUSEBUTTONDOWN:
                         #print(f"{pygame.mouse.get_pos()[0]} | {pygame.mouse.get_pos()[1]} | {self.save_window.visible}")
-                        if not (pygame.mouse.get_pos()[0] < 204 or pygame.mouse.get_pos()[1] > Constants.SCREEN_HEIGHT - 150 or self.save_window.visible):
+                        if not (pygame.mouse.get_pos()[0] < 204 or pygame.mouse.get_pos()[1] > Constants.SCREEN_HEIGHT - 150 or self.save_window.visible or self.code_terminal.visible):
                             mouse = pygame.mouse.get_pressed()
                             if mouse[0] and mods & pygame.KMOD_LALT:
                                 pygame.mouse.get_rel()
@@ -626,11 +628,13 @@ class Editor:
             ("#undo_icon", self.undo),
             ("#redo_icon", self.redo),
             ("#cursor_icon", lambda: self.SetCursorMode(MouseMode.CURSOR)),
-            ("#cursor_icon", lambda: self.SetCursorMode(MouseMode.CHECKPOINT)),
+            ("#checkpoint_icon", lambda: self.SetCursorMode(MouseMode.CHECKPOINT)),
             ("#insert_icon", lambda: self.SetCursorMode(MouseMode.INSERT)),
             ("#trash_icon", lambda: self.SetCursorMode(MouseMode.DELETE)),
             ("#load_icon", self.LoadLevel),
-            ("#save_icon", self.save_window.show)]):
+            ("#save_icon", self.save_window.show),
+            ("#level_icon", lambda: self.SetScreenMode(ScreenType.LEVEL)),
+            ("#code_icon", lambda: self.SetScreenMode(ScreenType.CODING))]):
             UIButton(Rect((i % 4) * 50, ((i // 4) * 50) + 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID(object_id, "@round_big_button"), command=func)
 
         #UIButton(Rect(0, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#undo_icon", "@round_big_button"), command=lambda: self.undo())
@@ -644,6 +648,23 @@ class Editor:
 
     def SetCursorMode(self, cursor_mode: MouseMode):
         self.cursor_mode = cursor_mode
+
+    def SetScreenMode(self, screen_mode: ScreenType):
+        match self.screen:
+            case ScreenType.NONE:
+                ...
+            case ScreenType.LEVEL:
+                ...
+            case ScreenType.CODING:
+                self.code_terminal.hide()
+        self.screen = screen_mode
+        match self.screen:
+            case ScreenType.NONE:
+                ...
+            case ScreenType.LEVEL:
+                ...
+            case ScreenType.CODING:
+                self.code_terminal.show()
 
     def to_dict(self) -> dictStrAny:
         return {
