@@ -5,6 +5,7 @@ from pygame_gui.elements import UIPanel, UILabel, UIButton, UITextBox
 from Editoor.Editor import Editor
 from DataValues import Constants, Assets
 from Application import Application
+from Game.Platformer import Platformer
 import pygame
 
 def main():
@@ -52,6 +53,7 @@ def main():
 
     app: Application = Application(Constants.VERSION, screen, uiManager, clock)
     edit: Editor = Editor(app)
+    platformer: Platformer = Platformer(app)
 
     running: bool = True
     m_type = ""
@@ -74,7 +76,7 @@ def main():
 
     match m_type:
         case "Game":
-            ...
+            platformer.run()
         case "Editor":
             edit.run()
         case "Achievements":
