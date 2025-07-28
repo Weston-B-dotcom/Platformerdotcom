@@ -118,6 +118,16 @@
       }
     }
   },
+  "#checkpoint_icon": {
+    "misc": {
+      "auto_scale_images": "1"
+    },
+    "images": {
+      "normal_image": {
+        "path": "Data/Images/checkpoint.png"
+      }
+    }
+  },
   "#trash_icon": {
     "misc": {
       "auto_scale_images": "1"

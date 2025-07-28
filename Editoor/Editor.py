@@ -637,14 +637,7 @@ class Editor:
             ("#code_icon", lambda: self.SetScreenMode(ScreenType.CODING))]):
             UIButton(Rect((i % 4) * 50, ((i // 4) * 50) + 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID(object_id, "@round_big_button"), command=func)
 
-        #UIButton(Rect(0, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#undo_icon", "@round_big_button"), command=lambda: self.undo())
-        #UIButton(Rect(50, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#redo_icon", "@round_big_button"), command=lambda: self.redo())
-        #UIButton(Rect(100, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#cursor_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.CURSOR))
-        #UIButton(Rect(150, 50, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#trash_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.DELETE))
-        #UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#insert_icon", "@round_big_button"), command=lambda: self.SetCursorMode(MouseMode.INSERT))
-        #UIButton(Rect(0, 100, 50, 50), "", self.app.manager, side_panel, object_id=ObjectID("#save_icon", "@round_big_button"), command=lambda: self.save_window.show())
-
-        return not self.running, "Editor" # Ok now push.
+        return not self.running, "Editor"
 
     def SetCursorMode(self, cursor_mode: MouseMode):
         self.cursor_mode = cursor_mode
