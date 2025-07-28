@@ -17,6 +17,9 @@ class ScreenType(Enum):
 
     NONE      = auto()
     MAIN_MENU = auto()
+    SAVES     = auto()
+    MODS      = auto()
+    SETTINGS  = auto()
     LEVELS    = auto()
     GAME      = auto()
 
@@ -25,6 +28,7 @@ class Platformer:
         self.running: bool|None = None
         self.app = app
         self.screen: ScreenType = ScreenType.MAIN_MENU
+        self.player: Player = Player(100, Constants.SCREEN_HEIGHT - 100)
     
     def run(self):
         while self.running:

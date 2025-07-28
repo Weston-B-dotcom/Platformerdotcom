@@ -26,18 +26,21 @@ def main():
     ])
 
     def m_RunGame():
-        ...
+        nonlocal running, m_type
+        running, m_type = platformer.init()
+
     def m_RunEditor():
         nonlocal running, m_type
         running, m_type = edit.init()
 
     def m_RunAchievement():
         ...
+
     def m_RunDebug():
         ...
+
     def m_RunPorter():
         ...
-
 
     uiManager.clear_and_reset()
     panel = UIPanel(Rect((0, 0), Constants.SCREEN_SIZE), manager=uiManager)
