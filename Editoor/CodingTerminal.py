@@ -10,7 +10,20 @@ from typing import Iterator
 import pygame, pygame_gui
 
 class IUIZeroBorderPanelDefault(UIPanel):
-    def __init__(self):
+    def __init__(self,
+        relative_rect: RectLike,
+        starting_height: int = 1,
+        manager: IUIManagerInterface|None = None,
+        *,
+        element_id: str = "panel",
+        margins: dict[str, int]|None = None,
+        container: IContainerLikeInterface|None = None,
+        parent_element: UIElement|None = None,
+        object_id: ObjectID|str|None = None,
+        anchors: dict[str, str|IUIElementInterface]|None = None,
+        visible: int = 1,
+    ):
+        super().__init__(relative_rect, starting_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=ObjectID(class_id="@code_terminal_panel") if object_id is None else object_id, anchors=anchors, visible=visible)
         self.border_width = {
             "left": 0,
             "right": 0,
@@ -354,7 +367,7 @@ class UIInteractionEditor(IUIZeroBorderPanelDefault):
         """
         return item in self.elements
     
-class UICodingPanelContainer(UIScrollingContainer, IUIZeroBorderElementDefault):
+class UICodingPanelContainer(UIScrollingContainer):
     """
     A container like UI element that lets users scroll around a larger container of content with
     scroll bars.
@@ -395,17 +408,79 @@ class UICodingPanelContainer(UIScrollingContainer, IUIZeroBorderElementDefault):
         allow_scroll_y: bool = True,
     ):
         super().__init__(relative_rect, manager, starting_height=starting_height, container=container, parent_element=parent_element, object_id=object_id, element_id=element_id, anchors=anchors, visible=visible, should_grow_automatically=should_grow_automatically, allow_scroll_x=allow_scroll_x, allow_scroll_y=allow_scroll_y)
-        super(UIScrollingContainer, self).__init__()
+        self.border_width = {
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "bottom": 0
+        }
         self.rebuild()
 
         self.instance_tree: list[Interaction] = []
         self.instance_ui: list[UIInteractionEditor] = []
     
+    def rebuild_from_changed_theme_data(self):
+        """
+        Checks if any theming parameters have changed, and if so triggers a full rebuild of the
+        panel's drawable shape.
+        """
+        super().rebuild_from_changed_theme_data()
+        has_any_changed = False
+
+        background_colour = self.ui_theme.get_colour_or_gradient(
+            "dark_bg", self.combined_element_ids
+        )
+        if background_colour != self.background_colour:
+            self.background_colour = background_colour
+            has_any_changed = True
+
+        border_colour = self.ui_theme.get_colour_or_gradient(
+            "normal_border", self.combined_element_ids
+        )
+        if border_colour != self.border_colour:
+            self.border_colour = border_colour
+            has_any_changed = True
+
+        def parse_to_bool(str_data: str):
+            return bool(int(str_data))
+
+        # Load auto_scale_images parameter BEFORE loading images so scaling can be applied
+        if self._check_misc_theme_data_changed(
+            attribute_name="auto_scale_images",
+            default_value=False,
+            casting_func=parse_to_bool,
+        ):
+            has_any_changed = True
+
+        # misc
+        if self._check_misc_theme_data_changed(
+            attribute_name="shape",
+            default_value="rectangle",
+            casting_func=str,
+            allowed_values=["rectangle", "rounded_rectangle"],
+        ):
+            has_any_changed = True
+
+        if self._check_misc_theme_data_changed(
+            attribute_name="tool_tip_delay", default_value=1.0, casting_func=float
+        ):
+            has_any_changed = True
+
+        if self._check_shape_theming_changed(
+            defaults={
+                "border_width": {"left": 0, "right": 0, "top": 0, "bottom": 0},
+                "shadow_width": 2,
+                "border_overlap": 1,
+                "shape_corner_radius": [2, 2, 2, 2],
+            }
+        ):
+            has_any_changed = True
+
+        if has_any_changed:
+            self.rebuild()
+    
     def update(self, time_delta):
         super().update(time_delta)
-
-    def rebuild(self):
-        return super(UIScrollingContainer, self).rebuild()
 
 class UICodingTerminal(IUIZeroBorderPanelDefault):
     def __init__(
@@ -423,7 +498,6 @@ class UICodingTerminal(IUIZeroBorderPanelDefault):
         visible: int = 1,
     ):
         super().__init__(relative_rect, starting_height, manager, element_id=element_id, margins=margins, container=container, parent_element=parent_element, object_id=ObjectID(class_id="@code_terminal_panel") if object_id is None else object_id, anchors=anchors, visible=visible)
-        super(UIPanel, self).__init__()
         self.rebuild()
 
         self.tabs: UITabContainer = UITabContainer(Rect(0, 0, relative_rect.w, relative_rect.h), manager, self)
@@ -446,6 +520,3 @@ class UICodingTerminal(IUIZeroBorderPanelDefault):
             match event.type:
                 case pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     ...
-
-    def rebuild(self):
-        return super(UIPanel, self).rebuild()
