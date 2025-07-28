@@ -181,7 +181,7 @@ class UIInteractionEditor(UIPanel, IUIZeroBorderPanelDefault, IContainerLikeInte
         super().update(time_delta)
         
         if self.dirty_size:
-            self.set_dimensions(self.elements)
+            self.set_dimensions()
 
     def on_contained_elements_changed(self, target: IUIElementInterface) -> None:
         """
