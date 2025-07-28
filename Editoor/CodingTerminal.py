@@ -151,7 +151,7 @@ class IUIZeroBorderElementDefault(UIElement):
         if has_any_changed:
             self.rebuild()
 
-class UIInteractionEditor(UIPanel, IUIZeroBorderPanelDefault, IContainerLikeInterface):
+class UIInteractionEditor(IUIZeroBorderPanelDefault):
     def __init__(
         self,
         relative_rect: RectLike,
@@ -407,7 +407,7 @@ class UICodingPanelContainer(UIScrollingContainer, IUIZeroBorderElementDefault):
     def rebuild(self):
         return super(UIScrollingContainer, self).rebuild()
 
-class UICodingTerminal(UIPanel, IUIZeroBorderPanelDefault):
+class UICodingTerminal(IUIZeroBorderPanelDefault):
     def __init__(
         self,
         relative_rect: RectLike,
