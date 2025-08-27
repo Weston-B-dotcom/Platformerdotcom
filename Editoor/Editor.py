@@ -143,21 +143,7 @@ class Editor:
         self.code_terminal: UICodingTerminal = None
 
         #region Doc
-        # In theory we could add branching in the future.
-        # what that
-        # Like how git does it.
-        # Aka when you make a new change instead of nuking everything in front of where you are.
-        # You add a horizontal 'branch', so if you go back to the other branch.
-        # That undo tree is kept.
-        #   2
-        # 1 2 <-                                            this 1 here
-        # 1 2 <- point where change is made, instead of deleting ^, you split to a new branch.
-        # 1
-        # 1
-        # 1 = branch 1
-        # 2 = branch 2
-        # definetly
-        # Not hard to do, but we should probably get save screen in. Simple enough.
+
         #endregion
         ...
 
@@ -487,7 +473,6 @@ class Editor:
 
             pygame.display.flip()
 
-        # Ok, let's add a way to open this menu, then test if stuff is doing stuff.
 
     def PopTag(self, index: int):
         self.tags_list[index].kill()
@@ -532,7 +517,6 @@ class Editor:
             self.RefreshTags()
 
     def RefreshTags(self):
-        # This should just be list stuff.
         #print("Refreshed")
         MAX_LIST_WIDTH = Constants.SCREEN_WIDTH - 518
         list_width = 127 # Width of individual tags, since then you can fit 7.
@@ -573,7 +557,6 @@ class Editor:
 
         self.save_window = UIWindow(Rect(150, 150, Constants.SCREEN_WIDTH - 300, 600), self.app.manager, "Save", object_id=ObjectID("#normal", "@save"))
         self.save_window.on_close_window_button_pressed = self.save_window.hide
-        #Ok, now what goes in this?
         # Elements: #Ill fill in the exact types since I know them.
         #  - name (UIEntryLine): What is the level going to be called?
         #  - tags (Auto generated, probably in a scrolling, will figure this out): What type of stuff is in the level? (difficulty, materials etc.)

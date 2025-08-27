@@ -12,9 +12,6 @@ def main():
     pygame.init()
     Assets.Textures.LoadStaticTextures()
     screen: Surface = pygame.display.set_mode(Constants.SCREEN_SIZE)
-    #Constants.SCREEN_SIZE = screen.get_size()
-    #Constants.SCREEN_WIDTH = screen.get_width()
-    #Constants.SCREEN_HEIGHT = screen.get_height()
     uiManager: UIManager = UIManager(Constants.SCREEN_SIZE, "Data/Themes/launcher_theme.json")
     clock: Clock = Clock()
     uiManager.preload_fonts([
