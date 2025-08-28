@@ -150,9 +150,6 @@ class Editor:
     def undo(self):
         if self.change_index < 0:
             return
-        #print("Undoing: ")
-        #print(self.change_index)
-        #print(self.changes)
         change: ChangeInfo = self.changes[self.change_index]
         match change.change_type:
             case ChangeType.PLATFORM_CREATE:
@@ -172,15 +169,9 @@ class Editor:
         self.change_index -= 1
 
     def redo(self):
-        #print("Redoing (Pre index): ")
-        #print(self.change_index)
-        #print(self.changes)
         if self.change_index >= len(self.changes) - 1:
             return
         self.change_index += 1
-        #print("Redoing (Post index): ")
-        #print(self.change_index)
-        #print(self.changes)
         change: ChangeInfo = self.changes[self.change_index]
         match change.change_type:
             case ChangeType.PLATFORM_CREATE:
@@ -199,17 +190,10 @@ class Editor:
                 self.level.checkpoints[change.data["checkpoint"]] = change.data["new_pos"]
 
     def AddToStack(self, change: ChangeInfo):
-        #print("Pre stack: ")
-        #print(self.changes)
-        #print(self.change_index)
 
         self.changes = self.changes[:(self.change_index + 1)]
         self.changes.append(change)
         self.change_index += 1
-
-        #print("Post stack: ")
-        #print(self.changes)
-        #print(self.change_index)
 
     def run(self):
         dragging: DragType = DragType.NONE
@@ -228,7 +212,6 @@ class Editor:
                     case pygame.QUIT:
                         self.running = False
                     case pygame.MOUSEBUTTONDOWN:
-                        #print(f"{pygame.mouse.get_pos()[0]} | {pygame.mouse.get_pos()[1]} | {self.save_window.visible}")
                         if not (pygame.mouse.get_pos()[0] < 204 or pygame.mouse.get_pos()[1] > Constants.SCREEN_HEIGHT - 150 or self.save_window.visible or self.code_terminal.visible):
                             mouse = pygame.mouse.get_pressed()
                             if mouse[0] and mods & pygame.KMOD_LALT:
@@ -356,21 +339,13 @@ class Editor:
                                         "data": self.level.platforms.pop(i).to_dict()
                                     }))
                         dragging = DragType.NONE
-                    case pygame.KEYDOWN: # Test it
-                        #print(f"Ours:  {mods} | {event.key}")
-                        #print(f"Undo:  {Keybinds.UNDO.mods} | {Keybinds.UNDO.key}")
-                        #print(f"Redo:  {Keybinds.REDO.mods} | {Keybinds.REDO.key}")
-                        #print(f"GDOn:  {Keybinds.GRID_DECREASE_ONE.mods} | {Keybinds.GRID_DECREASE_ONE.key} | {Keybinds.GRID_DECREASE_ONE.IsValid(mods, event.key)}")
-                        #print(f"GIOn:  {Keybinds.GRID_INCREASE_ONE.mods} | {Keybinds.GRID_INCREASE_ONE.key} | {Keybinds.GRID_INCREASE_ONE.IsValid(mods, event.key)}")
-                        #print(f"GDTe:  {Keybinds.GRID_DECREASE_TEN.mods} | {Keybinds.GRID_DECREASE_TEN.key} | {Keybinds.GRID_DECREASE_TEN.IsValid(mods, event.key)}")
-                        #print(f"GITe:  {Keybinds.GRID_INCREASE_TEN.mods} | {Keybinds.GRID_INCREASE_TEN.key} | {Keybinds.GRID_INCREASE_TEN.IsValid(mods, event.key)}")
+                    case pygame.KEYDOWN:
                         if Keybinds.REDO.IsValid(mods, event.key) != -1:
                             self.redo()
                         elif Keybinds.UNDO.IsValid(mods, event.key) != -1:
                             self.undo()
                         elif dragging == DragType.NONE or dragging == DragType.PANNING:
                             thingy = sorted([(val, val.IsValid(mods, event.key)) for val in GRID_RESIZING_KEYBINDS if val.IsValid(mods, event.key) > -1], key=lambda z: z[1], reverse=True)
-                            #print(thingy)
                             if len(thingy) > 0:
                                 match thingy[0][0]:
                                     case Keybinds.GRID_DECREASE_ONE:
@@ -499,15 +474,11 @@ class Editor:
             def DelTag():
                 index = -1
                 for i, rag in enumerate(self.tags_list):
-                    #print(f"{i} - {rag.text}/{name}")
                     if rag.text == name:
-                        #print("match")
                         index = i
                         break
                 if index != -1:
-                    #print("Pop")
                     self.PopTag(index)
-                    #print("Refresh")
                     self.RefreshTags()
             return DelTag
 
@@ -517,7 +488,6 @@ class Editor:
             self.RefreshTags()
 
     def RefreshTags(self):
-        #print("Refreshed")
         MAX_LIST_WIDTH = Constants.SCREEN_WIDTH - 518
         list_width = 127 # Width of individual tags, since then you can fit 7.
         for i in range(len(self.tags_list)):
@@ -557,7 +527,7 @@ class Editor:
 
         self.save_window = UIWindow(Rect(150, 150, Constants.SCREEN_WIDTH - 300, 600), self.app.manager, "Save", object_id=ObjectID("#normal", "@save"))
         self.save_window.on_close_window_button_pressed = self.save_window.hide
-        # Elements: #Ill fill in the exact types since I know them.
+        # Elements:
         #  - name (UIEntryLine): What is the level going to be called?
         #  - tags (Auto generated, probably in a scrolling, will figure this out): What type of stuff is in the level? (difficulty, materials etc.)
         #  - size (UIEntryLine 2x + UIDropdown + UIButton): How big does the level have to be to fit all materials?
@@ -586,8 +556,6 @@ class Editor:
         self.grid_slider_label = UILabel(Rect(0, 0, 200, 24), "Grid: 1", self.app.manager, side_panel)
         self.grid_slider = UIHorizontalSlider(Rect(0, 24, 200, 24), 1, (1, 100), self.app.manager, container=side_panel, object_id=ObjectID("#grid_slider", "@editor"), click_increment=1)
         ui_panel = UIPanel(Rect((204, Constants.SCREEN_HEIGHT - 150, Constants.SCREEN_WIDTH - 204, 150)), manager=self.app.manager, object_id=ObjectID("#ui_panel", "@editor"))
-
-        #UITextBox("Editor", Rect(12, 7, Constants.SCREEN_WIDTH - 124, 50), self.app.manager, object_id=ObjectID("#sub_title", "@editor"))
 
         self.code_terminal = UICodingTerminal(Rect(204, 0, Constants.SCREEN_WIDTH - 204, Constants.SCREEN_HEIGHT - 150), manager=self.app.manager)
 
