@@ -91,13 +91,11 @@ class UIColorEntry(UIPanel):
 
     def process_event(self, event: pygame.event.Event):
         super().process_event(event)
-        if self is not None:
+        if self.__module__ is not None:
             match event.type:
                 case pygame_gui.UI_TEXT_ENTRY_CHANGED:
-                    #print("Change")
                     ...
                 case pygame_gui.UI_TEXT_ENTRY_FINISHED:
-                    #print("Finished")
                     match event.ui_element:
                         case self.r_text:
                             self.ValidateRed(True)
@@ -106,7 +104,6 @@ class UIColorEntry(UIPanel):
                         case self.b_text:
                             self.ValidateBlue(True)
                 case pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
-                    #print("Slider")
                     match event.ui_element:
                         case self.r_slider:
                             self.ValidateRed(False)
